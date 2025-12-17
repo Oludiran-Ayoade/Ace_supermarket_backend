@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: ace-supermarket-backend
+    env: go
+    buildCommand: go build -o main .
+    startCommand: ./main
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: GIN_MODE
+        value: release
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: ace-supermarket-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ace-supermarket-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: ace-supermarket-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ace-supermarket-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: ace-supermarket-db
+          property: database
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_PRESET
+        sync: false
+      - key: REDIS_HOST
+        value: localhost:6379
+      - key: REDIS_PASSWORD
+        value: ""
+      - key: REDIS_DB
+        value: "0"
+      - key: CACHE_ENABLED
+        value: "true"
+      - key: CACHE_DEFAULT_TTL
+        value: "900"
+
+databases:
+  - name: ace-supermarket-db
+    databaseName: aceSuperMarket
+    user: postgres
