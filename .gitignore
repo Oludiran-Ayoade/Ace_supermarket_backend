@@ -27,9 +27,6 @@ uploads/
 *.swo
 .DS_Store
 
-# Go modules
-go.sum
-
 # Temporary files
 tmp/
 temp/
