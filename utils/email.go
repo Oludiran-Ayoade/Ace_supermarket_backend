@@ -1,9 +1,13 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
@@ -253,13 +257,72 @@ const passwordResetOTPTemplate = `
 
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
-	// Log OTP for development/testing (no actual email sent)
+	// Always log OTP for debugging
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
-	log.Printf("✅ OTP generated successfully - Check logs for code")
 
-	// Skip actual email sending to avoid SMTP timeout on Render
-	// TODO: Integrate proper email service (SendGrid, AWS SES, etc.) for production
+	subject := "Password Reset Code - Ace Supermarket"
+	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
+
+	// Try Mailgun first, fallback to logging if not configured
+	err := SendEmailViaMailgun(to, subject, body)
+	if err != nil {
+		log.Printf("⚠️ Mailgun not configured, OTP logged above")
+		return nil
+	}
+
+	log.Printf("✅ Password reset email sent successfully via Mailgun")
+	return nil
+}
+
+// SendEmailViaMailgun sends email using Mailgun API
+func SendEmailViaMailgun(to, subject, htmlBody string) error {
+	mailgunAPIKey := os.Getenv("MAILGUN_API_KEY")
+	mailgunDomain := os.Getenv("MAILGUN_DOMAIN")
+
+	if mailgunAPIKey == "" || mailgunDomain == "" {
+		return fmt.Errorf("mailgun not configured")
+	}
+
+	// Mailgun API endpoint
+	url := fmt.Sprintf("https://api.mailgun.net/v3/%s/messages", mailgunDomain)
+
+	// Prepare form data
+	data := map[string]string{
+		"from":    fmt.Sprintf("Ace Supermarket <noreply@%s>", mailgunDomain),
+		"to":      to,
+		"subject": subject,
+		"html":    htmlBody,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth("api", mailgunAPIKey)
+
+	// Send request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check response
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("mailgun API error: %s - %s", resp.Status, string(body))
+	}
+
 	return nil
 }
 
