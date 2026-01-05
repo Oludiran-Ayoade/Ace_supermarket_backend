@@ -253,13 +253,14 @@ const passwordResetOTPTemplate = `
 
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
-	// Always log OTP for testing/debugging
+	// Log OTP for development/testing (no actual email sent)
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
+	log.Printf("✅ OTP generated successfully - Check logs for code")
 
-	subject := "Password Reset Code - Ace Supermarket"
-	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
-	return SendEmail(to, subject, body)
+	// Skip actual email sending to avoid SMTP timeout on Render
+	// TODO: Integrate proper email service (SendGrid, AWS SES, etc.) for production
+	return nil
 }
 
 // nolint:SA5009
