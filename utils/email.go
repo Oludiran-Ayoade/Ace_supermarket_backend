@@ -1,16 +1,15 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
+
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 // SendEmail sends an email using SMTP
@@ -255,74 +254,65 @@ const passwordResetOTPTemplate = `
 </html>
 `
 
+// SendEmailWithSendGrid sends email using SendGrid API
+func SendEmailWithSendGrid(to, toName, subject, htmlBody string) error {
+	apiKey := os.Getenv("SENDGRID_API_KEY")
+	fromEmail := os.Getenv("SENDGRID_FROM_EMAIL")
+	fromName := os.Getenv("SENDGRID_FROM_NAME")
+
+	if fromEmail == "" {
+		fromEmail = "noreply@acesupermarket.com"
+	}
+	if fromName == "" {
+		fromName = "Ace Supermarket"
+	}
+
+	from := mail.NewEmail(fromName, fromEmail)
+	recipient := mail.NewEmail(toName, to)
+	message := mail.NewSingleEmail(from, subject, recipient, "", htmlBody)
+
+	client := sendgrid.NewSendClient(apiKey)
+	response, err := client.Send(message)
+
+	if err != nil {
+		log.Printf("❌ SendGrid error: %v", err)
+		return err
+	}
+
+	if response.StatusCode >= 400 {
+		log.Printf("❌ SendGrid failed with status %d: %s", response.StatusCode, response.Body)
+		return fmt.Errorf("sendgrid failed with status %d", response.StatusCode)
+	}
+
+	log.Printf("✅ Email sent successfully via SendGrid to %s", to)
+	return nil
+}
+
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
 	// Always log OTP for debugging
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
 
-	subject := "Password Reset Code - Ace Supermarket"
-	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
+	sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
-	// Try Mailgun first, fallback to logging if not configured
-	err := SendEmailViaMailgun(to, subject, body)
-	if err != nil {
-		log.Printf("⚠️ Mailgun not configured, OTP logged above")
+	// If SendGrid is not configured, only log OTP
+	if sendgridKey == "" {
+		log.Printf("⚠️ SendGrid not configured - OTP logged only (check environment variables)")
 		return nil
 	}
 
-	log.Printf("✅ Password reset email sent successfully via Mailgun")
-	return nil
-}
+	// Send email via SendGrid
+	subject := "Password Reset Code - Ace Supermarket"
+	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
 
-// SendEmailViaMailgun sends email using Mailgun API
-func SendEmailViaMailgun(to, subject, htmlBody string) error {
-	mailgunAPIKey := os.Getenv("MAILGUN_API_KEY")
-	mailgunDomain := os.Getenv("MAILGUN_DOMAIN")
-
-	if mailgunAPIKey == "" || mailgunDomain == "" {
-		return fmt.Errorf("mailgun not configured")
-	}
-
-	// Mailgun API endpoint
-	url := fmt.Sprintf("https://api.mailgun.net/v3/%s/messages", mailgunDomain)
-
-	// Prepare form data
-	data := map[string]string{
-		"from":    fmt.Sprintf("Ace Supermarket <noreply@%s>", mailgunDomain),
-		"to":      to,
-		"subject": subject,
-		"html":    htmlBody,
-	}
-
-	jsonData, err := json.Marshal(data)
+	err := SendEmailWithSendGrid(to, fullName, subject, body)
 	if err != nil {
+		log.Printf("⚠️ Failed to send email via SendGrid, but OTP is logged above")
 		return err
 	}
 
-	// Create HTTP request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.SetBasicAuth("api", mailgunAPIKey)
-
-	// Send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Check response
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("mailgun API error: %s - %s", resp.Status, string(body))
-	}
-
+	log.Printf("✅ Password reset email sent successfully to %s", to)
 	return nil
 }
 
