@@ -91,7 +91,7 @@ func SendEmail(to, subject, htmlBody string) error {
 	return nil
 }
 
-//nolint:SA5009
+// nolint:SA5009
 const accountCreatedTemplate = `
 <!DOCTYPE html>
 <html>
@@ -182,7 +182,7 @@ const accountCreatedTemplate = `
 // SendAccountCreatedEmail sends welcome email to newly created staff
 func SendAccountCreatedEmail(to, fullName, email, password, roleName, departmentName, branchName string) error {
 	subject := "Welcome to Ace Supermarket - Your Account Has Been Created"
-	
+
 	// Build branch info HTML
 	branchHTML := ""
 	if branchName != "" {
@@ -191,12 +191,12 @@ func SendAccountCreatedEmail(to, fullName, email, password, roleName, department
 			<span class="info-value">%s</span>
 		</div>`, branchName)
 	}
-	
+
 	body := fmt.Sprintf(accountCreatedTemplate, fullName, roleName, departmentName, branchHTML, email, password)
 	return SendEmail(to, subject, body)
 }
 
-//nolint:SA5009
+// nolint:SA5009
 const passwordResetOTPTemplate = `
 <!DOCTYPE html>
 <html>
@@ -253,12 +253,16 @@ const passwordResetOTPTemplate = `
 
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
+	// Always log OTP for testing/debugging
+	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
+	log.Printf("📧 Full Name: %s", fullName)
+
 	subject := "Password Reset Code - Ace Supermarket"
 	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
 	return SendEmail(to, subject, body)
 }
 
-//nolint:SA5009
+// nolint:SA5009
 const adminNotificationTemplate = `
 <!DOCTYPE html>
 <html>
