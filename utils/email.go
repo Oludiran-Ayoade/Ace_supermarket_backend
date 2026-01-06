@@ -59,13 +59,13 @@ const accountCreatedTemplate = `
 	<style>
 		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
 		.container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-		.header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 40px 30px; text-align: center; }
+		.header { background: linear-gradient(135deg, #4CAF50 0%%, #2E7D32 100%%); color: white; padding: 40px 30px; text-align: center; }
 		.header h1 { margin: 0; font-size: 28px; font-weight: 600; }
 		.header p { margin: 10px 0 0 0; font-size: 14px; opacity: 0.9; }
 		.content { padding: 40px 30px; }
 		.greeting { font-size: 18px; color: #333; margin-bottom: 20px; }
-		.info-box { background: linear-gradient(135deg, #f5f7fa 0%%, #c3cfe2 100%%); border-left: 4px solid #667eea; padding: 20px; margin: 25px 0; border-radius: 8px; }
-		.info-box h3 { margin: 0 0 15px 0; color: #667eea; font-size: 16px; }
+		.info-box { background: linear-gradient(135deg, #f5f7fa 0%%, #c3cfe2 100%%); border-left: 4px solid #4CAF50; padding: 20px; margin: 25px 0; border-radius: 8px; }
+		.info-box h3 { margin: 0 0 15px 0; color: #4CAF50; font-size: 16px; }
 		.info-item { margin: 10px 0; }
 		.info-label { font-weight: 600; color: #555; display: inline-block; width: 120px; }
 		.info-value { color: #333; font-family: 'Courier New', monospace; background: white; padding: 4px 8px; border-radius: 4px; }
@@ -129,8 +129,8 @@ const accountCreatedTemplate = `
 		</div>
 		<div class="footer">
 			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com | 📞 +234 (0) 123 456 7890</p>
-			<p>© 2024 Ace Supermarket. All rights reserved.</p>
+			<p>📧 support@acesupermarket.com</p>
+			<p>© 2026 Ace Supermarket. All rights reserved.</p>
 		</div>
 	</div>
 </body>
@@ -164,10 +164,10 @@ const passwordResetOTPTemplate = `
 	<style>
 		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
 		.container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-		.header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 40px 30px; text-align: center; }
+		.header { background: linear-gradient(135deg, #4CAF50 0%%, #2E7D32 100%%); color: white; padding: 40px 30px; text-align: center; }
 		.header h1 { margin: 0; font-size: 28px; font-weight: 600; }
 		.content { padding: 40px 30px; }
-		.otp-box { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 30px; margin: 25px 0; border-radius: 8px; text-align: center; }
+		.otp-box { background: linear-gradient(135deg, #4CAF50 0%%, #2E7D32 100%%); color: white; padding: 30px; margin: 25px 0; border-radius: 8px; text-align: center; }
 		.otp-code { font-size: 48px; font-weight: bold; letter-spacing: 8px; margin: 20px 0; font-family: 'Courier New', monospace; }
 		.warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; color: #856404; }
 		.footer { background: #f8f9fa; padding: 30px; text-align: center; color: #666; font-size: 13px; border-top: 1px solid #e9ecef; }
@@ -201,8 +201,8 @@ const passwordResetOTPTemplate = `
 		</div>
 		<div class="footer">
 			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com | 📞 +234 (0) 123 456 7890</p>
-			<p>© 2024 Ace Supermarket. All rights reserved.</p>
+			<p>📧 support@acesupermarket.com</p>
+			<p>© 2026 Ace Supermarket. All rights reserved.</p>
 		</div>
 	</div>
 </body>
@@ -230,10 +230,10 @@ const adminNotificationTemplate = `
 	<style>
 		body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
 		.container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-		.header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 40px 30px; text-align: center; }
+		.header { background: linear-gradient(135deg, #4CAF50 0%%, #2E7D32 100%%); color: white; padding: 40px 30px; text-align: center; }
 		.header h1 { margin: 0; font-size: 28px; font-weight: 600; }
 		.content { padding: 40px 30px; }
-		.message-box { background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0; border-radius: 8px; }
+		.message-box { background: #f8f9fa; border-left: 4px solid #4CAF50; padding: 20px; margin: 25px 0; border-radius: 8px; }
 		.from-box { background: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 8px; }
 		.footer { background: #f8f9fa; padding: 30px; text-align: center; color: #666; font-size: 13px; border-top: 1px solid #e9ecef; }
 	</style>
@@ -252,7 +252,7 @@ const adminNotificationTemplate = `
 			</div>
 			
 			<div class="message-box">
-				<h3 style="margin-top: 0; color: #667eea;">%s</h3>
+				<h3 style="margin-top: 0; color: #4CAF50;">%s</h3>
 				<p style="white-space: pre-wrap;">%s</p>
 			</div>
 			
@@ -260,8 +260,8 @@ const adminNotificationTemplate = `
 		</div>
 		<div class="footer">
 			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com | 📞 +234 (0) 123 456 7890</p>
-			<p>© 2024 Ace Supermarket. All rights reserved.</p>
+			<p>📧 support@acesupermarket.com</p>
+			<p>© 2026 Ace Supermarket. All rights reserved.</p>
 		</div>
 	</div>
 </body>
