@@ -5,41 +5,47 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/gomail.v2"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-// SendEmail sends an email using gomail library with SMTP port 587
+// SendEmail sends an email using SendGrid HTTP API
 func SendEmail(to, subject, htmlBody string) error {
-	emailUser := os.Getenv("EMAIL_USER")
-	emailPass := os.Getenv("EMAIL_PASS")
-	smtpHost := "smtp.gmail.com"
-	smtpPort := 587
+	sendGridAPIKey := os.Getenv("SENDGRID_API_KEY")
+	fromEmail := os.Getenv("FROM_EMAIL")
+	fromName := "Ace Supermarket"
 
-	if emailUser == "" || emailPass == "" {
-		log.Printf("⚠️ Email credentials not configured. Logging email instead.\n")
+	if sendGridAPIKey == "" {
+		log.Printf("⚠️ SendGrid API key not configured. Logging email instead.\n")
 		log.Printf("📧 TO: %s\n", to)
 		log.Printf("📧 SUBJECT: %s\n", subject)
 		log.Printf("📧 BODY:\n%s\n", htmlBody)
 		return nil
 	}
 
-	// Create new message
-	m := gomail.NewMessage()
-	m.SetHeader("From", fmt.Sprintf("Ace Supermarket <%s>", emailUser))
-	m.SetHeader("To", to)
-	m.SetHeader("Subject", subject)
-	m.SetBody("text/html", htmlBody)
+	if fromEmail == "" {
+		fromEmail = "noreply@acesupermarket.com"
+	}
 
-	// Create dialer with SMTP credentials
-	d := gomail.NewDialer(smtpHost, smtpPort, emailUser, emailPass)
+	// Create SendGrid message
+	from := mail.NewEmail(fromName, fromEmail)
+	toEmail := mail.NewEmail("", to)
+	message := mail.NewSingleEmail(from, subject, toEmail, "", htmlBody)
 
-	// Send email
-	if err := d.DialAndSend(m); err != nil {
+	// Send email via SendGrid API
+	client := sendgrid.NewSendClient(sendGridAPIKey)
+	response, err := client.Send(message)
+	if err != nil {
 		log.Printf("❌ Failed to send email to %s: %v\n", to, err)
 		return err
 	}
 
-	log.Printf("✅ Email sent successfully to: %s\n", to)
+	if response.StatusCode >= 400 {
+		log.Printf("❌ SendGrid API error for %s: Status %d - %s\n", to, response.StatusCode, response.Body)
+		return fmt.Errorf("sendgrid API error: status %d", response.StatusCode)
+	}
+
+	log.Printf("✅ Email sent successfully to: %s (Status: %d)\n", to, response.StatusCode)
 	return nil
 }
 
@@ -205,16 +211,13 @@ const passwordResetOTPTemplate = `
 
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
-	// Log OTP for development/testing
+	// Always log OTP for debugging
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
-	log.Printf("✅ OTP generated successfully - Check logs for code")
 
-	// NOTE: Render blocks all outbound SMTP ports (465, 587, 25)
-	// For production, integrate a proper email service like SendGrid, AWS SES, or Mailgun
-	// For now, OTP codes are logged above for testing/development
-
-	return nil
+	subject := "Password Reset Code - Ace Supermarket"
+	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
+	return SendEmail(to, subject, body)
 }
 
 // nolint:SA5009
