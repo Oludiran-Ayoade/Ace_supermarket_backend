@@ -162,6 +162,14 @@ func SendMessage(c *gin.Context) {
 			VALUES ($1, $2, $3, 'message', $4, $5)
 		`, targetUserID, req.Title, req.Content, messageID, notificationExpiresAt)
 
+		// Send push notification
+		pushData := map[string]string{
+			"type":       "admin_message",
+			"message_id": messageID,
+			"sender":     senderName,
+		}
+		_ = utils.SendPushNotification(db, targetUserID, req.Title, req.Content, pushData)
+
 		// Send email notification
 		emailErr := utils.SendAdminNotification(targetEmail, targetName, senderName, senderRole, req.Title, req.Content)
 		if emailErr == nil {

@@ -43,6 +43,12 @@ func main() {
 		log.Println("✓ Cloudinary initialized successfully")
 	}
 
+	// Initialize Firebase for push notifications
+	if err := utils.InitFirebase(); err != nil {
+		log.Println("⚠️ Warning: Firebase initialization failed:", err)
+		log.Println("Push notifications will not be available")
+	}
+
 	// Start shift notification scheduler (30-minute reminders)
 	shiftScheduler := scheduler.NewShiftNotificationScheduler(config.DB)
 	shiftScheduler.Start()
@@ -171,6 +177,11 @@ func main() {
 			protected.PUT("/notifications/mark-all-read", handlers.MarkAllNotificationsAsRead)
 			protected.POST("/notifications", handlers.CreateNotification)
 			protected.DELETE("/notifications/:id", handlers.DeleteNotification)
+
+			// Device token routes (for push notifications)
+			protected.POST("/device-tokens/register", handlers.RegisterDeviceToken)
+			protected.POST("/device-tokens/unregister", handlers.UnregisterDeviceToken)
+			protected.POST("/device-tokens/test", handlers.TestPushNotification)
 
 			// Messages routes (admin only)
 			protected.POST("/messages/send", handlers.SendMessage)

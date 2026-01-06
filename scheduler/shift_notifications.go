@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"ace-mall-backend/utils"
 	"database/sql"
 	"log"
 	"time"
@@ -139,6 +140,21 @@ func (s *ShiftNotificationScheduler) checkAndSendNotifications() {
 			log.Printf("⚠️ Error creating shift notification for %s: %v", fullName, err)
 			continue
 		}
+
+		// Send push notification
+		pushData := map[string]string{
+			"type":       "shift_reminder",
+			"shift_type": shiftType,
+			"start_time": startTime,
+			"end_time":   endTime,
+		}
+		if departmentName.Valid {
+			pushData["department"] = departmentName.String
+		}
+		if branchName.Valid {
+			pushData["branch"] = branchName.String
+		}
+		_ = utils.SendPushNotification(s.db, staffID, title, message, pushData)
 
 		notificationCount++
 		log.Printf("📢 Shift notification sent to %s for %s shift at %s", fullName, shiftType, startTime)
