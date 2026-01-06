@@ -1,23 +1,19 @@
 package utils
 
 import (
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/smtp"
 	"os"
-	"strings"
 
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"gopkg.in/gomail.v2"
 )
 
-// SendEmail sends an email using SMTP
+// SendEmail sends an email using gomail library with SMTP port 587
 func SendEmail(to, subject, htmlBody string) error {
 	emailUser := os.Getenv("EMAIL_USER")
 	emailPass := os.Getenv("EMAIL_PASS")
 	smtpHost := "smtp.gmail.com"
-	smtpPort := "465"
+	smtpPort := 587
 
 	if emailUser == "" || emailPass == "" {
 		log.Printf("⚠️ Email credentials not configured. Logging email instead.\n")
@@ -27,66 +23,19 @@ func SendEmail(to, subject, htmlBody string) error {
 		return nil
 	}
 
-	// Create plain text version
-	plainBody := strings.ReplaceAll(htmlBody, "<br>", "\n")
-	plainBody = strings.ReplaceAll(plainBody, "</p>", "\n")
+	// Create new message
+	m := gomail.NewMessage()
+	m.SetHeader("From", fmt.Sprintf("Ace Supermarket <%s>", emailUser))
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", htmlBody)
 
-	// Build email message
-	message := fmt.Sprintf("From: Ace Supermarket <%s>\r\n", emailUser)
-	message += fmt.Sprintf("To: %s\r\n", to)
-	message += fmt.Sprintf("Subject: %s\r\n", subject)
-	message += "MIME-Version: 1.0\r\n"
-	message += "Content-Type: text/html; charset=UTF-8\r\n"
-	message += "\r\n"
-	message += htmlBody
+	// Create dialer with SMTP credentials
+	d := gomail.NewDialer(smtpHost, smtpPort, emailUser, emailPass)
 
-	// Setup TLS config
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		ServerName:         smtpHost,
-	}
-
-	// Connect to SMTP server
-	conn, err := tls.Dial("tcp", smtpHost+":"+smtpPort, tlsConfig)
-	if err != nil {
-		log.Printf("❌ Failed to connect to SMTP server: %v\n", err)
-		return err
-	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, smtpHost)
-	if err != nil {
-		log.Printf("❌ Failed to create SMTP client: %v\n", err)
-		return err
-	}
-	defer client.Close()
-
-	// Authenticate
-	auth := smtp.PlainAuth("", emailUser, emailPass, smtpHost)
-	if err = client.Auth(auth); err != nil {
-		log.Printf("❌ SMTP authentication failed: %v\n", err)
-		return err
-	}
-
-	// Set sender and recipient
-	if err = client.Mail(emailUser); err != nil {
-		return err
-	}
-	if err = client.Rcpt(to); err != nil {
-		return err
-	}
-
-	// Send email body
-	w, err := client.Data()
-	if err != nil {
-		return err
-	}
-	_, err = w.Write([]byte(message))
-	if err != nil {
-		return err
-	}
-	err = w.Close()
-	if err != nil {
+	// Send email
+	if err := d.DialAndSend(m); err != nil {
+		log.Printf("❌ Failed to send email to %s: %v\n", to, err)
 		return err
 	}
 
@@ -254,66 +203,15 @@ const passwordResetOTPTemplate = `
 </html>
 `
 
-// SendEmailWithSendGrid sends email using SendGrid API
-func SendEmailWithSendGrid(to, toName, subject, htmlBody string) error {
-	apiKey := os.Getenv("SENDGRID_API_KEY")
-	fromEmail := os.Getenv("SENDGRID_FROM_EMAIL")
-	fromName := os.Getenv("SENDGRID_FROM_NAME")
-
-	if fromEmail == "" {
-		fromEmail = "noreply@acesupermarket.com"
-	}
-	if fromName == "" {
-		fromName = "Ace Supermarket"
-	}
-
-	from := mail.NewEmail(fromName, fromEmail)
-	recipient := mail.NewEmail(toName, to)
-	message := mail.NewSingleEmail(from, subject, recipient, "", htmlBody)
-
-	client := sendgrid.NewSendClient(apiKey)
-	response, err := client.Send(message)
-
-	if err != nil {
-		log.Printf("❌ SendGrid error: %v", err)
-		return err
-	}
-
-	if response.StatusCode >= 400 {
-		log.Printf("❌ SendGrid failed with status %d: %s", response.StatusCode, response.Body)
-		return fmt.Errorf("sendgrid failed with status %d", response.StatusCode)
-	}
-
-	log.Printf("✅ Email sent successfully via SendGrid to %s", to)
-	return nil
-}
-
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
 	// Always log OTP for debugging
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
 
-	sendgridKey := os.Getenv("SENDGRID_API_KEY")
-
-	// If SendGrid is not configured, only log OTP
-	if sendgridKey == "" {
-		log.Printf("⚠️ SendGrid not configured - OTP logged only (check environment variables)")
-		return nil
-	}
-
-	// Send email via SendGrid
 	subject := "Password Reset Code - Ace Supermarket"
 	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
-
-	err := SendEmailWithSendGrid(to, fullName, subject, body)
-	if err != nil {
-		log.Printf("⚠️ Failed to send email via SendGrid, but OTP is logged above")
-		return err
-	}
-
-	log.Printf("✅ Password reset email sent successfully to %s", to)
-	return nil
+	return SendEmail(to, subject, body)
 }
 
 // nolint:SA5009
