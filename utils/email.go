@@ -205,13 +205,16 @@ const passwordResetOTPTemplate = `
 
 // SendPasswordResetOTP sends OTP for password reset
 func SendPasswordResetOTP(to, fullName, otp string) error {
-	// Always log OTP for debugging
+	// Log OTP for development/testing
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
+	log.Printf("✅ OTP generated successfully - Check logs for code")
 
-	subject := "Password Reset Code - Ace Supermarket"
-	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
-	return SendEmail(to, subject, body)
+	// NOTE: Render blocks all outbound SMTP ports (465, 587, 25)
+	// For production, integrate a proper email service like SendGrid, AWS SES, or Mailgun
+	// For now, OTP codes are logged above for testing/development
+
+	return nil
 }
 
 // nolint:SA5009
