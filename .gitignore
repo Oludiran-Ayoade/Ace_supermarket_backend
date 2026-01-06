@@ -30,3 +30,6 @@ uploads/
 # Temporary files
 tmp/
 temp/
+
+# Firebase credentials (NEVER commit this!)
+firebase-credentials.json
