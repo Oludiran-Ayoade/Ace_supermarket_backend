@@ -42,18 +42,21 @@ func CanViewProfile(db *sql.DB, requesterID string, targetUserID string) (Permis
 		return PermissionViewBasic, nil
 	}
 
-	// HR, CEO, COO, Chairman, and Auditors can view everything
-	// Also senior_admin category can view everything
+	// Only HR, CEO, and COO can view FULL profile (documents, next of kin, guarantors)
 	if requesterRole.String == "Human Resource" ||
 		requesterRole.String == "Chief Executive Officer" ||
-		requesterRole.String == "Chief Operating Officer" ||
-		requesterRole.String == "Chairman" ||
-		requesterRole.String == "Auditor" ||
-		requesterRoleCategory == "senior_admin" {
+		requesterRole.String == "Chief Operating Officer" {
 		return PermissionViewFull, nil
 	}
 
-	// Group Heads can view all staff in their department across all branches
+	// Chairman and Auditors can view basic staff info only (no documents/guarantors)
+	if requesterRole.String == "Chairman" ||
+		requesterRole.String == "Auditor" ||
+		requesterRoleCategory == "senior_admin" {
+		return PermissionViewTeam, nil
+	}
+
+	// Group Heads can view basic info for staff in their department across all branches
 	if strings.Contains(requesterRole.String, "Group Head") {
 		var targetDeptID sql.NullString
 		err := db.QueryRow(`SELECT department_id FROM users WHERE id = $1`, targetUserID).Scan(&targetDeptID)
@@ -65,7 +68,7 @@ func CanViewProfile(db *sql.DB, requesterID string, targetUserID string) (Permis
 		}
 	}
 
-	// Branch Managers can view all staff in their branch
+	// Branch Managers can view basic info for all staff in their branch
 	if strings.Contains(requesterRole.String, "Branch Manager") {
 		var targetBranchID sql.NullString
 		err := db.QueryRow(`SELECT branch_id FROM users WHERE id = $1`, targetUserID).Scan(&targetBranchID)
@@ -77,7 +80,7 @@ func CanViewProfile(db *sql.DB, requesterID string, targetUserID string) (Permis
 		}
 	}
 
-	// Floor Managers can view staff in their department and branch
+	// Floor Managers can view basic info for staff in their department and branch
 	if strings.Contains(requesterRole.String, "Floor Manager") {
 		var targetBranchID, targetDeptID sql.NullString
 		err := db.QueryRow(`
@@ -248,6 +251,11 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 
 	if err != nil {
 		return nil, err
+	}
+
+	// Only fetch Next of Kin and Guarantors for PermissionViewFull (HR/CEO/COO)
+	if permissionLevel != PermissionViewFull {
+		return user, nil
 	}
 
 	// Fetch Next of Kin

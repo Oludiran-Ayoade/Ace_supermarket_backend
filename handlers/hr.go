@@ -16,6 +16,7 @@ import (
 // GetAllStaff returns all staff members (HR/CEO/COO only)
 func GetAllStaff(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
+	requesterID := c.GetString("user_id")
 
 	// Check if this is being called from branch endpoint
 	isBranchEndpoint := c.GetBool("is_branch_endpoint")
@@ -166,6 +167,10 @@ func GetAllStaff(c *gin.Context) {
 		if dateJoined.Valid {
 			staffMember["date_joined"] = dateJoined.Time
 		}
+
+		// Calculate permission level for this staff member
+		permissionLevel, _ := utils.CanViewProfile(db, requesterID, id)
+		staffMember["permission_level"] = string(permissionLevel)
 
 		staff = append(staff, staffMember)
 	}

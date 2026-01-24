@@ -205,7 +205,10 @@ func main() {
 			{
 				hr.GET("/staff", handlers.GetAllStaff)
 				hr.GET("/stats", handlers.GetStaffStats)
-				hr.POST("/staff", handlers.CreateStaffByHR) // HR can create any type of staff
+				hr.POST("/staff", handlers.CreateStaffByHR)                                        // HR can create any type of staff
+				hr.POST("/staff/bulk-upload", handlers.BulkUploadStaff)                            // Bulk upload staff via CSV
+				hr.POST("/documents/bulk-upload", handlers.BulkUploadDocuments)                    // Bulk upload staff documents
+				hr.POST("/documents/guarantor-bulk-upload", handlers.BulkUploadGuarantorDocuments) // Bulk upload guarantor documents
 			}
 
 			// Branch Manager routes (require admin or senior_admin role)
@@ -224,9 +227,16 @@ func main() {
 			protected.PUT("/staff/:user_id", handlers.UpdateStaffProfile) // HR only
 
 			// Staff Termination routes (HR/COO/CEO only)
-			protected.POST("/staff/terminate", handlers.TerminateStaff)
-			protected.GET("/staff/terminated", handlers.GetTerminatedStaff)
-			protected.PUT("/staff/terminated/:id/clearance", handlers.UpdateClearanceStatus)
+			staffTermination := protected.Group("/staff")
+			staffTermination.Use(middleware.RequireRole("senior_admin")) // Only senior_admin (HR/CEO/COO)
+			{
+				staffTermination.POST("/:id/terminate", handlers.TerminateStaff)
+				staffTermination.POST("/:id/restore", handlers.RestoreStaff)
+				staffTermination.GET("/departed", handlers.GetDepartedStaff)
+			}
+
+			// DANGER ZONE: Cleanup endpoint (use once before production)
+			protected.POST("/cleanup/all-staff", middleware.RequireRole("senior_admin"), handlers.CleanupAllStaffData)
 		}
 	}
 
