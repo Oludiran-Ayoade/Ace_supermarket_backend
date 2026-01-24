@@ -92,8 +92,8 @@ func CleanupAllStaffData(c *gin.Context) {
 	count, _ = result.RowsAffected()
 	deletedCounts["terminated_staff"] = count
 
-	// 15. Delete all users (staff)
-	result, _ = tx.Exec("DELETE FROM users")
+	// 15. Delete all users EXCEPT master HR account
+	result, _ = tx.Exec("DELETE FROM users WHERE email != 'hr@acesupermarket.com'")
 	count, _ = result.RowsAffected()
 	deletedCounts["users"] = count
 

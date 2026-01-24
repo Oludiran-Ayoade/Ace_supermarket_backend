@@ -240,6 +240,9 @@ func main() {
 		}
 	}
 
+	// Public setup endpoint - create master HR (no auth required for initial setup)
+	router.POST("/api/v1/setup/master-hr", handlers.CreateMasterHR)
+
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
