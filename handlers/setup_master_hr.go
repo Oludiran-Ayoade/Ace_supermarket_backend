@@ -6,12 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // CreateMasterHR creates or resets the master HR account
 // Email: hr@acesupermarket.com
-// Password: AceHR2024!
+// Password: password123
 func CreateMasterHR(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
 
@@ -23,13 +22,6 @@ func CreateMasterHR(c *gin.Context) {
 		return
 	}
 
-	// Hash password: AceHR2024!
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("AceHR2024!"), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-
 	// Delete existing master HR if exists
 	_, _ = db.Exec(`DELETE FROM users WHERE email = 'hr@acesupermarket.com'`)
 
@@ -38,17 +30,16 @@ func CreateMasterHR(c *gin.Context) {
 	_, err = db.Exec(`
 		INSERT INTO users (
 			id, email, password_hash, full_name, role_id, employee_id,
-			is_active, is_email_verified, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+			is_active, date_joined, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), NOW())
 	`,
 		masterHRID,
 		"hr@acesupermarket.com",
-		string(hashedPassword),
+		"password123",
 		"Master HR Administrator",
 		hrRoleID,
 		"HR-MASTER-001",
 		true, // is_active
-		true, // is_email_verified
 	)
 
 	if err != nil {
@@ -59,7 +50,7 @@ func CreateMasterHR(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "✅ Master HR account created successfully",
 		"email":       "hr@acesupermarket.com",
-		"password":    "AceHR2024!",
+		"password":    "password123",
 		"employee_id": "HR-MASTER-001",
 		"note":        "This account will NOT be deleted during cleanup operations",
 	})
