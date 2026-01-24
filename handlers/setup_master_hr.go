@@ -37,7 +37,7 @@ func CreateMasterHR(c *gin.Context) {
 	masterHRID := uuid.New().String()
 	_, err = db.Exec(`
 		INSERT INTO users (
-			id, email, password, full_name, role_id, employee_id,
+			id, email, password_hash, full_name, role_id, employee_id,
 			is_active, is_email_verified, created_at, updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
 	`,
