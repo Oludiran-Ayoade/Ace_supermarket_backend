@@ -177,9 +177,9 @@ CREATE TABLE guarantor_documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     guarantor_id UUID REFERENCES guarantors(id) ON DELETE CASCADE,
     document_type VARCHAR(100) NOT NULL, -- 'passport', 'national_id', 'work_id'
-    file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(500) NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
