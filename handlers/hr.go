@@ -399,6 +399,20 @@ func CreateStaffByHR(c *gin.Context) {
 		NyscCertificateURL   *string `json:"nysc_certificate_url"`
 		StateOfOriginCertURL *string `json:"state_of_origin_cert_url"`
 		ProfileImageURL      *string `json:"profile_image_url"`
+		// Guarantor document URLs
+		G1PassportURL   *string `json:"g1_passport_url"`
+		G1NationalIDURL *string `json:"g1_national_id_url"`
+		G1WorkIDURL     *string `json:"g1_work_id_url"`
+		G2PassportURL   *string `json:"g2_passport_url"`
+		G2NationalIDURL *string `json:"g2_national_id_url"`
+		G2WorkIDURL     *string `json:"g2_work_id_url"`
+		// Work Experience
+		WorkExperience []struct {
+			CompanyName string `json:"company_name"`
+			Position    string `json:"position"`
+			StartDate   string `json:"start_date"`
+			EndDate     string `json:"end_date"`
+		} `json:"work_experience"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -481,31 +495,120 @@ func CreateStaffByHR(c *gin.Context) {
 		}
 	}
 
-	// Insert Guarantor 1
-	if req.Guarantor1 != nil && req.Guarantor1.FullName != "" {
-		g1UUID := uuid.New().String()
+	// Insert Guarantor 1 - also create if documents are uploaded without name
+	var g1UUID string
+	hasG1Docs := (req.G1PassportURL != nil && *req.G1PassportURL != "") ||
+		(req.G1NationalIDURL != nil && *req.G1NationalIDURL != "") ||
+		(req.G1WorkIDURL != nil && *req.G1WorkIDURL != "")
+	hasG1Info := req.Guarantor1 != nil && req.Guarantor1.FullName != ""
+
+	if hasG1Info || hasG1Docs {
+		g1UUID = uuid.New().String()
+		g1Name := "Guarantor 1"
+		var g1Phone, g1Occupation, g1Relationship, g1Sex, g1Address, g1Email, g1GradeLevel string
+		var g1Age int
+		if req.Guarantor1 != nil {
+			if req.Guarantor1.FullName != "" {
+				g1Name = req.Guarantor1.FullName
+			}
+			g1Phone = req.Guarantor1.Phone
+			g1Occupation = req.Guarantor1.Occupation
+			g1Relationship = req.Guarantor1.Relationship
+			g1Sex = req.Guarantor1.Sex
+			g1Age = req.Guarantor1.Age
+			g1Address = req.Guarantor1.HomeAddress
+			g1Email = req.Guarantor1.Email
+			g1GradeLevel = req.Guarantor1.GradeLevel
+		}
 		_, g1Err := config.DB.Exec(`
 			INSERT INTO guarantors (id, user_id, guarantor_number, full_name, phone_number, occupation, relationship, sex, age, home_address, email, grade_level, created_at, updated_at)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-		`, g1UUID, userUUID, 1, req.Guarantor1.FullName, req.Guarantor1.Phone, req.Guarantor1.Occupation,
-			req.Guarantor1.Relationship, req.Guarantor1.Sex, req.Guarantor1.Age, req.Guarantor1.HomeAddress,
-			req.Guarantor1.Email, req.Guarantor1.GradeLevel, now, now)
+		`, g1UUID, userUUID, 1, g1Name, g1Phone, g1Occupation, g1Relationship, g1Sex, g1Age, g1Address, g1Email, g1GradeLevel, now, now)
 		if g1Err != nil {
-			// Non-critical: guarantor 1 insert failed
+			fmt.Printf("⚠️ Guarantor 1 insert failed: %v\n", g1Err)
+		} else {
+			fmt.Printf("✅ Created Guarantor 1 record: %s\n", g1UUID)
+			// Insert Guarantor 1 documents
+			if req.G1PassportURL != nil && *req.G1PassportURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g1UUID, "passport", *req.G1PassportURL, now, now)
+				fmt.Printf("✅ Saved Guarantor 1 passport: %s\n", *req.G1PassportURL)
+			}
+			if req.G1NationalIDURL != nil && *req.G1NationalIDURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g1UUID, "national_id", *req.G1NationalIDURL, now, now)
+			}
+			if req.G1WorkIDURL != nil && *req.G1WorkIDURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g1UUID, "work_id", *req.G1WorkIDURL, now, now)
+			}
 		}
 	}
 
-	// Insert Guarantor 2
-	if req.Guarantor2 != nil && req.Guarantor2.FullName != "" {
-		g2UUID := uuid.New().String()
+	// Insert Guarantor 2 - also create if documents are uploaded without name
+	var g2UUID string
+	hasG2Docs := (req.G2PassportURL != nil && *req.G2PassportURL != "") ||
+		(req.G2NationalIDURL != nil && *req.G2NationalIDURL != "") ||
+		(req.G2WorkIDURL != nil && *req.G2WorkIDURL != "")
+	hasG2Info := req.Guarantor2 != nil && req.Guarantor2.FullName != ""
+
+	if hasG2Info || hasG2Docs {
+		g2UUID = uuid.New().String()
+		g2Name := "Guarantor 2"
+		var g2Phone, g2Occupation, g2Relationship, g2Sex, g2Address, g2Email, g2GradeLevel string
+		var g2Age int
+		if req.Guarantor2 != nil {
+			if req.Guarantor2.FullName != "" {
+				g2Name = req.Guarantor2.FullName
+			}
+			g2Phone = req.Guarantor2.Phone
+			g2Occupation = req.Guarantor2.Occupation
+			g2Relationship = req.Guarantor2.Relationship
+			g2Sex = req.Guarantor2.Sex
+			g2Age = req.Guarantor2.Age
+			g2Address = req.Guarantor2.HomeAddress
+			g2Email = req.Guarantor2.Email
+			g2GradeLevel = req.Guarantor2.GradeLevel
+		}
 		_, g2Err := config.DB.Exec(`
 			INSERT INTO guarantors (id, user_id, guarantor_number, full_name, phone_number, occupation, relationship, sex, age, home_address, email, grade_level, created_at, updated_at)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-		`, g2UUID, userUUID, 2, req.Guarantor2.FullName, req.Guarantor2.Phone, req.Guarantor2.Occupation,
-			req.Guarantor2.Relationship, req.Guarantor2.Sex, req.Guarantor2.Age, req.Guarantor2.HomeAddress,
-			req.Guarantor2.Email, req.Guarantor2.GradeLevel, now, now)
+		`, g2UUID, userUUID, 2, g2Name, g2Phone, g2Occupation, g2Relationship, g2Sex, g2Age, g2Address, g2Email, g2GradeLevel, now, now)
 		if g2Err != nil {
-			// Non-critical: guarantor 2 insert failed
+			fmt.Printf("⚠️ Guarantor 2 insert failed: %v\n", g2Err)
+		} else {
+			fmt.Printf("✅ Created Guarantor 2 record: %s\n", g2UUID)
+			// Insert Guarantor 2 documents
+			if req.G2PassportURL != nil && *req.G2PassportURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g2UUID, "passport", *req.G2PassportURL, now, now)
+				fmt.Printf("✅ Saved Guarantor 2 passport: %s\n", *req.G2PassportURL)
+			}
+			if req.G2NationalIDURL != nil && *req.G2NationalIDURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g2UUID, "national_id", *req.G2NationalIDURL, now, now)
+			}
+			if req.G2WorkIDURL != nil && *req.G2WorkIDURL != "" {
+				docUUID := uuid.New().String()
+				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+					docUUID, g2UUID, "work_id", *req.G2WorkIDURL, now, now)
+			}
+		}
+	}
+
+	// Insert Work Experience
+	for _, exp := range req.WorkExperience {
+		if exp.CompanyName != "" || exp.Position != "" {
+			expUUID := uuid.New().String()
+			config.DB.Exec(`
+				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			`, expUUID, userUUID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
 		}
 	}
 
@@ -536,4 +639,121 @@ func CreateStaffByHR(c *gin.Context) {
 		response["employee_id"] = *employeeID
 	}
 	c.JSON(http.StatusCreated, response)
+}
+
+// UploadGuarantorDoc uploads a document for a guarantor
+func UploadGuarantorDoc(c *gin.Context) {
+	db := c.MustGet("db").(*sql.DB)
+	userID := c.Param("user_id")
+
+	var req struct {
+		GuarantorNumber int    `json:"guarantor_number"`
+		DocumentType    string `json:"document_type"`
+		DocumentURL     string `json:"document_url"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	now := time.Now()
+
+	// Find the guarantor ID for this user, or create one if it doesn't exist
+	var guarantorID string
+	err := db.QueryRow(`
+		SELECT id FROM guarantors 
+		WHERE user_id = $1 AND guarantor_number = $2 
+		LIMIT 1
+	`, userID, req.GuarantorNumber).Scan(&guarantorID)
+
+	if err != nil {
+		// Guarantor doesn't exist, create one with a placeholder name
+		guarantorID = uuid.New().String()
+		guarantorName := fmt.Sprintf("Guarantor %d", req.GuarantorNumber)
+		_, createErr := db.Exec(`
+			INSERT INTO guarantors (id, user_id, guarantor_number, full_name, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6)
+		`, guarantorID, userID, req.GuarantorNumber, guarantorName, now, now)
+		if createErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create guarantor record: " + createErr.Error()})
+			return
+		}
+		fmt.Printf("✅ Created guarantor record for user %s, guarantor %d\n", userID, req.GuarantorNumber)
+	}
+
+	// Check if document already exists
+	var existingID string
+	err = db.QueryRow(`
+		SELECT id FROM guarantor_documents 
+		WHERE guarantor_id = $1 AND document_type = $2
+	`, guarantorID, req.DocumentType).Scan(&existingID)
+
+	if err == nil {
+		// Update existing document
+		_, err = db.Exec(`
+			UPDATE guarantor_documents 
+			SET file_path = $1, updated_at = $2 
+			WHERE id = $3
+		`, req.DocumentURL, now, existingID)
+	} else {
+		// Insert new document
+		docUUID := uuid.New().String()
+		_, err = db.Exec(`
+			INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6)
+		`, docUUID, guarantorID, req.DocumentType, req.DocumentURL, now, now)
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save document: " + err.Error()})
+		return
+	}
+
+	fmt.Printf("✅ Saved guarantor document: user=%s, guarantor=%d, type=%s\n", userID, req.GuarantorNumber, req.DocumentType)
+	c.JSON(http.StatusOK, gin.H{"message": "Guarantor document uploaded successfully"})
+}
+
+// UpdateWorkExperience updates work experience for a staff member
+func UpdateWorkExperience(c *gin.Context) {
+	db := c.MustGet("db").(*sql.DB)
+	userID := c.Param("user_id")
+
+	var req struct {
+		WorkExperience []struct {
+			CompanyName string `json:"company_name"`
+			Position    string `json:"position"`
+			StartDate   string `json:"start_date"`
+			EndDate     string `json:"end_date"`
+		} `json:"work_experience"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Delete existing work experience for this user
+	_, err := db.Exec(`DELETE FROM work_experience WHERE user_id = $1`, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing work experience"})
+		return
+	}
+
+	// Insert new work experience entries
+	now := time.Now()
+	for _, exp := range req.WorkExperience {
+		if exp.CompanyName != "" || exp.Position != "" {
+			expUUID := uuid.New().String()
+			_, err := db.Exec(`
+				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			`, expUUID, userID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
+			if err != nil {
+				fmt.Printf("Error inserting work experience: %v\n", err)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Work experience updated successfully"})
 }

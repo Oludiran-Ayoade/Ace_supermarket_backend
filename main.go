@@ -224,7 +224,9 @@ func main() {
 
 			// Staff Profile routes
 			protected.GET("/staff/:user_id", handlers.GetProfile)
-			protected.PUT("/staff/:user_id", handlers.UpdateStaffProfile) // HR only
+			protected.PUT("/staff/:user_id", handlers.UpdateStaffProfile)                     // HR only
+			protected.PUT("/staff/:user_id/work-experience", handlers.UpdateWorkExperience)   // Update work experience
+			protected.POST("/staff/:user_id/guarantor-document", handlers.UploadGuarantorDoc) // Upload guarantor document
 
 			// Staff Termination routes (HR/COO/CEO only)
 			staffTermination := protected.Group("/staff")

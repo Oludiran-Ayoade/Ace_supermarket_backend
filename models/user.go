@@ -108,6 +108,9 @@ type User struct {
 	Guarantor2NationalID   *string `json:"guarantor2_national_id,omitempty"`
 	Guarantor2WorkID       *string `json:"guarantor2_work_id,omitempty"`
 
+	// Work Experience
+	WorkExperience []map[string]interface{} `json:"work_experience,omitempty"`
+
 	// Status
 	IsActive          bool       `json:"is_active"`
 	IsTerminated      bool       `json:"is_terminated"`
