@@ -232,8 +232,8 @@ func main() {
 			staffTermination := protected.Group("/staff")
 			staffTermination.Use(middleware.RequireRole("senior_admin")) // Only senior_admin (HR/CEO/COO)
 			{
-				staffTermination.POST("/:id/terminate", handlers.TerminateStaff)
-				staffTermination.POST("/:id/restore", handlers.RestoreStaff)
+				staffTermination.POST("/:user_id/terminate", handlers.TerminateStaff)
+				staffTermination.POST("/:user_id/restore", handlers.RestoreStaff)
 				staffTermination.GET("/departed", handlers.GetDepartedStaff)
 			}
 
