@@ -138,20 +138,20 @@ BEGIN
 
         -- Cinema Sub-department
         INSERT INTO roles (name, category, department_id, sub_department_id, description) VALUES
-        ('Manager (Cinema)', 'admin', fun_arcade_dept_id, cinema_subdept_id, 'Manages Cinema operations'),
+        ('Supervisor (Cinema)', 'admin', fun_arcade_dept_id, cinema_subdept_id, 'Supervises Cinema operations'),
         ('Cinema Staff', 'general', fun_arcade_dept_id, cinema_subdept_id, 'General cinema operations staff')
         ON CONFLICT (name, department_id) DO NOTHING;
 
         -- Photo Studio Sub-department
         INSERT INTO roles (name, category, department_id, sub_department_id, description) VALUES
-        ('Manager (Photo Studio)', 'admin', fun_arcade_dept_id, photo_subdept_id, 'Manages Photo Studio operations'),
+        ('Supervisor (Photo Studio)', 'admin', fun_arcade_dept_id, photo_subdept_id, 'Supervises Photo Studio operations'),
         ('Photographer', 'general', fun_arcade_dept_id, photo_subdept_id, 'Professional photographer'),
         ('Studio Staff', 'general', fun_arcade_dept_id, photo_subdept_id, 'General photo studio support staff')
         ON CONFLICT (name, department_id) DO NOTHING;
 
         -- Saloon Sub-department
         INSERT INTO roles (name, category, department_id, sub_department_id, description) VALUES
-        ('Manager (Saloon)', 'admin', fun_arcade_dept_id, saloon_subdept_id, 'Manages Saloon operations'),
+        ('Supervisor (Saloon)', 'admin', fun_arcade_dept_id, saloon_subdept_id, 'Supervises Saloon operations'),
         ('Hair Stylist', 'general', fun_arcade_dept_id, saloon_subdept_id, 'Professional hair stylist'),
         ('Barber', 'general', fun_arcade_dept_id, saloon_subdept_id, 'Professional barber'),
         ('Saloon Staff', 'general', fun_arcade_dept_id, saloon_subdept_id, 'General saloon support staff')
@@ -160,13 +160,14 @@ BEGIN
         -- Arcade and Kiddies Park Sub-department
         INSERT INTO roles (name, category, department_id, sub_department_id, description) VALUES
         ('Manager (Arcade & Kiddies Park)', 'admin', fun_arcade_dept_id, arcade_subdept_id, 'Manages Arcade and Kiddies Park operations'),
+        ('Supervisor (Arcade)', 'admin', fun_arcade_dept_id, arcade_subdept_id, 'Supervises Arcade operations'),
         ('Gamer', 'general', fun_arcade_dept_id, arcade_subdept_id, 'Arcade game operator and assistant'),
         ('Arcade Staff', 'general', fun_arcade_dept_id, arcade_subdept_id, 'General arcade support staff')
         ON CONFLICT (name, department_id) DO NOTHING;
 
         -- Casino Sub-department
         INSERT INTO roles (name, category, department_id, sub_department_id, description) VALUES
-        ('Manager (Casino)', 'admin', fun_arcade_dept_id, casino_subdept_id, 'Manages Casino operations'),
+        ('Supervisor (Casino)', 'admin', fun_arcade_dept_id, casino_subdept_id, 'Supervises Casino operations'),
         ('Casino Staff', 'general', fun_arcade_dept_id, casino_subdept_id, 'General casino operations staff')
         ON CONFLICT (name, department_id) DO NOTHING;
     END;
