@@ -288,6 +288,13 @@ func GetPromotionHistory(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
 	staffID := c.Param("staff_id")
 
+	fmt.Printf("📊 GetPromotionHistory called for staff_id: %s\n", staffID)
+
+	// First check how many records exist for this user
+	var count int
+	db.QueryRow("SELECT COUNT(*) FROM promotion_history WHERE user_id = $1", staffID).Scan(&count)
+	fmt.Printf("📊 Found %d promotion records for user_id: %s\n", count, staffID)
+
 	query := `
 		SELECT 
 			ph.id,
@@ -307,11 +314,12 @@ func GetPromotionHistory(c *gin.Context) {
 		LEFT JOIN branches pb ON ph.previous_branch_id = pb.id
 		LEFT JOIN branches nb ON ph.new_branch_id = nb.id
 		WHERE ph.user_id = $1
-		ORDER BY ph.promotion_date DESC
+		ORDER BY ph.promotion_date DESC, ph.id DESC
 	`
 
 	rows, err := db.Query(query, staffID)
 	if err != nil {
+		fmt.Printf("❌ Error querying promotion history: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch promotion history"})
 		return
 	}
