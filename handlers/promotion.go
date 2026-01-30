@@ -162,8 +162,48 @@ func PromoteStaff(c *gin.Context) {
 				return nil
 			}())
 		if err != nil {
-			fmt.Printf("Warning: Failed to add work experience: %v\n", err)
+			fmt.Printf("Warning: Failed to add previous work experience: %v\n", err)
 			// Don't fail the whole promotion for this
+		}
+	}
+
+	// Get new role and branch names for current position work experience
+	var newRoleName, newBranchName string
+	if req.NewRoleID != nil {
+		db.QueryRow("SELECT name FROM roles WHERE id = $1", *req.NewRoleID).Scan(&newRoleName)
+	} else {
+		newRoleName = currentRoleName // Keeping same role
+	}
+
+	if req.BranchID != nil {
+		db.QueryRow("SELECT name FROM branches WHERE id = $1", *req.BranchID).Scan(&newBranchName)
+	} else if currentBranchName.Valid {
+		newBranchName = currentBranchName.String
+	}
+
+	// Add NEW/CURRENT position to work_experience with NULL end_date (ongoing)
+	if newBranchName != "" {
+		_, err = tx.Exec(`
+			INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, role_id, branch_id, created_at, updated_at)
+			VALUES (gen_random_uuid(), $1, $2, $3, $4, NULL, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		`, req.StaffID, "Ace Mall - "+newBranchName, newRoleName, time.Now().Format("2006-01-02"),
+			func() interface{} {
+				if req.NewRoleID != nil {
+					return *req.NewRoleID
+				}
+				return currentRoleID
+			}(),
+			func() interface{} {
+				if req.BranchID != nil {
+					return *req.BranchID
+				}
+				if currentBranchID.Valid {
+					return currentBranchID.String
+				}
+				return nil
+			}())
+		if err != nil {
+			fmt.Printf("Warning: Failed to add current work experience: %v\n", err)
 		}
 	}
 
@@ -199,22 +239,18 @@ func PromoteStaff(c *gin.Context) {
 		return
 	}
 
-	// Get new role name if role changed
-	newRoleName := currentRoleName
-	if req.NewRoleID != nil {
-		tx.QueryRow("SELECT name FROM roles WHERE id = $1", *req.NewRoleID).Scan(&newRoleName)
-	}
-
 	// Create notification for staff
 	var promoterName string
 	db.QueryRow("SELECT full_name FROM users WHERE id = $1", promoterID).Scan(&promoterName)
 
 	notificationTitle := "Promotion Notification"
-	notificationMessage := promoterName + " has promoted you"
+	notificationMessage := promoterName + " has "
 	if req.NewRoleID != nil {
-		notificationMessage += " to " + newRoleName
+		notificationMessage += "promoted you to " + newRoleName
+	} else if req.BranchID != nil {
+		notificationMessage += "transferred you to " + newBranchName
 	} else {
-		notificationMessage += " with a salary increase"
+		notificationMessage += "given you a salary increase"
 	}
 
 	tx.Exec(`
