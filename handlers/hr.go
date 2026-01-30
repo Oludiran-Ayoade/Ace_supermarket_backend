@@ -721,10 +721,12 @@ func UpdateWorkExperience(c *gin.Context) {
 
 	var req struct {
 		WorkExperience []struct {
-			CompanyName string `json:"company_name"`
-			Position    string `json:"position"`
-			StartDate   string `json:"start_date"`
-			EndDate     string `json:"end_date"`
+			CompanyName string  `json:"company_name"`
+			Position    string  `json:"position"`
+			StartDate   string  `json:"start_date"`
+			EndDate     string  `json:"end_date"`
+			RoleID      *string `json:"role_id"`
+			BranchID    *string `json:"branch_id"`
 		} `json:"work_experience"`
 	}
 
@@ -755,9 +757,9 @@ func UpdateWorkExperience(c *gin.Context) {
 		if exp.CompanyName != "" || exp.Position != "" {
 			expUUID := uuid.New().String()
 			_, err := tx.Exec(`
-				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-			`, expUUID, userID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
+				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, role_id, branch_id, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			`, expUUID, userID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, exp.RoleID, exp.BranchID, now, now)
 			if err != nil {
 				fmt.Printf("Error inserting work experience: %v\n", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert work experience: " + err.Error()})
