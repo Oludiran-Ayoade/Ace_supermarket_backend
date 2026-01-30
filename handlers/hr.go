@@ -43,7 +43,7 @@ func GetAllStaff(c *gin.Context) {
 	query := `
 		SELECT 
 			u.id, u.email, u.full_name, u.gender, u.phone_number,
-			u.employee_id, u.profile_image_url,
+			u.employee_id, u.profile_image_url, u.date_of_birth,
 			r.id as role_id, r.name as role_name, r.category as role_category,
 			d.id as department_id, d.name as department_name,
 			b.id as branch_id, b.name as branch_name,
@@ -100,6 +100,7 @@ func GetAllStaff(c *gin.Context) {
 		var (
 			id, email, fullName                              string
 			gender, phoneNumber, employeeID, profileImageURL sql.NullString
+			dateOfBirth                                      sql.NullTime
 			roleID, roleName, roleCategory                   sql.NullString
 			departmentID, departmentName                     sql.NullString
 			branchIDVal, branchName                          sql.NullString
@@ -110,7 +111,7 @@ func GetAllStaff(c *gin.Context) {
 
 		err := rows.Scan(
 			&id, &email, &fullName, &gender, &phoneNumber,
-			&employeeID, &profileImageURL,
+			&employeeID, &profileImageURL, &dateOfBirth,
 			&roleID, &roleName, &roleCategory,
 			&departmentID, &departmentName,
 			&branchIDVal, &branchName,
@@ -139,6 +140,9 @@ func GetAllStaff(c *gin.Context) {
 		}
 		if profileImageURL.Valid {
 			staffMember["profile_image_url"] = profileImageURL.String
+		}
+		if dateOfBirth.Valid {
+			staffMember["date_of_birth"] = dateOfBirth.Time
 		}
 		if roleID.Valid {
 			staffMember["role_id"] = roleID.String
