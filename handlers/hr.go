@@ -733,10 +733,19 @@ func UpdateWorkExperience(c *gin.Context) {
 		return
 	}
 
-	// Delete existing work experience for this user
-	_, err := db.Exec(`DELETE FROM work_experience WHERE user_id = $1`, userID)
+	// Start a transaction
+	tx, err := db.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing work experience"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback()
+
+	// Delete existing work experience for this user
+	_, err = tx.Exec(`DELETE FROM work_experience WHERE user_id = $1`, userID)
+	if err != nil {
+		fmt.Printf("Error clearing work experience for user %s: %v\n", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing work experience: " + err.Error()})
 		return
 	}
 
@@ -745,15 +754,24 @@ func UpdateWorkExperience(c *gin.Context) {
 	for _, exp := range req.WorkExperience {
 		if exp.CompanyName != "" || exp.Position != "" {
 			expUUID := uuid.New().String()
-			_, err := db.Exec(`
+			_, err := tx.Exec(`
 				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			`, expUUID, userID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
 			if err != nil {
 				fmt.Printf("Error inserting work experience: %v\n", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert work experience: " + err.Error()})
+				return
 			}
 		}
 	}
 
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	fmt.Printf("✅ Updated work experience for user %s (%d entries)\n", userID, len(req.WorkExperience))
 	c.JSON(http.StatusOK, gin.H{"message": "Work experience updated successfully"})
 }

@@ -1,17 +1,17 @@
 -- ============================================
--- CREATE SUB-DEPARTMENT MANAGERS
+-- CREATE SUB-DEPARTMENT SUPERVISORS
 -- ============================================
 -- Password for all: password123
 -- Bcrypt hash: $2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO
 -- ============================================
 
--- Cinema Manager - Abeokuta
+-- Cinema Supervisor - Abeokuta
 INSERT INTO users (email, password_hash, full_name, role_id, department_id, sub_department_id, branch_id, phone_number, gender, date_joined, is_active)
 VALUES (
     'cinema.abeokuta@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Tayo Adeyemi',
-    (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+    (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Cinema'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -21,13 +21,13 @@ VALUES (
     true
 );
 
--- Cinema Manager - Bodija
+-- Cinema Supervisor - Bodija
 INSERT INTO users (email, password_hash, full_name, role_id, department_id, sub_department_id, branch_id, phone_number, gender, date_joined, is_active)
 VALUES (
     'cinema.bodija@acesupermarket.com',
-    '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
+    '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5xGqJ5XqJ5xGqJ5xGqJO',
     'Miss Funke Oladele',
-    (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+    (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Cinema'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -37,13 +37,13 @@ VALUES (
     true
 );
 
--- Cinema Manager - Akobo
+-- Cinema Supervisor - Akobo
 INSERT INTO users (email, password_hash, full_name, role_id, department_id, sub_department_id, branch_id, phone_number, gender, date_joined, is_active)
 VALUES (
     'cinema.akobo@acesupermarket.com',
-    '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
+    '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5XqJ5XqJ5xGqJO',
     'Mr. Segun Afolabi',
-    (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+    (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Cinema'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
@@ -59,7 +59,7 @@ VALUES (
     'photostudio.abeokuta@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mrs. Kemi Adebayo',
-    (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+    (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -75,7 +75,7 @@ VALUES (
     'photostudio.bodija@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Wale Ogunbiyi',
-    (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+    (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -91,7 +91,7 @@ VALUES (
     'photostudio.akobo@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Miss Shade Akinola',
-    (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+    (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
@@ -107,7 +107,7 @@ VALUES (
     'saloon.abeokuta@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Miss Blessing Okoro',
-    (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+    (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Saloon'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -123,7 +123,7 @@ VALUES (
     'saloon.bodija@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Gbenga Fashola',
-    (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+    (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Saloon'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -139,7 +139,7 @@ VALUES (
     'saloon.akobo@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mrs. Yetunde Olatunji',
-    (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+    (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Saloon'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
@@ -155,7 +155,7 @@ VALUES (
     'arcade.abeokuta@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Kunle Adeleke',
-    (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+    (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -171,7 +171,7 @@ VALUES (
     'arcade.bodija@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Miss Zainab Ibrahim',
-    (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+    (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -187,7 +187,7 @@ VALUES (
     'arcade.akobo@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Biodun Alabi',
-    (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+    (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
@@ -203,7 +203,7 @@ VALUES (
     'casino.abeokuta@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Chidi Okonkwo',
-    (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+    (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Casino'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -219,7 +219,7 @@ VALUES (
     'casino.bodija@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mrs. Amaka Nwosu',
-    (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+    (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Casino'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -235,7 +235,7 @@ VALUES (
     'casino.akobo@acesupermarket.com',
     '$2a$10$YhFHq1HZ5HvLZVbLw5wY4.3Z8KqVnJ5xGqJ5XqJ5xGqJ5XqJ5xGqJO',
     'Mr. Lanre Adebisi',
-    (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+    (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
     (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
     (SELECT id FROM sub_departments WHERE name = 'Casino'),
     (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
@@ -246,11 +246,11 @@ VALUES (
 );
 
 -- Success message
-SELECT '✅ Successfully created 15 Sub-Department Managers!' AS status;
-SELECT '   - 3 Cinema Managers' AS details;
-SELECT '   - 3 Photo Studio Managers' AS details;
-SELECT '   - 3 Saloon Managers' AS details;
-SELECT '   - 3 Arcade Managers' AS details;
-SELECT '   - 3 Casino Managers' AS details;
+SELECT '✅ Successfully created 15 Sub-Department Supervisors!' AS status;
+SELECT '   - 3 Cinema Supervisors' AS details;
+SELECT '   - 3 Photo Studio Supervisors' AS details;
+SELECT '   - 3 Saloon Supervisors' AS details;
+SELECT '   - 3 Arcade Supervisors' AS details;
+SELECT '   - 3 Casino Supervisors' AS details;
 SELECT '' AS blank;
 SELECT '🔑 All accounts use password: password123' AS credentials;

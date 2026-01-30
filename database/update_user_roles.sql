@@ -14,7 +14,7 @@ DECLARE
     cook_lounge UUID;
     cook_eatery UUID;
     security_role UUID;
-    cinema_mgr UUID;
+    cinema_supervisor UUID;
 BEGIN
     -- Get role IDs
     SELECT id INTO ceo_role FROM roles WHERE name = 'Chief Executive Officer' LIMIT 1;
@@ -27,7 +27,7 @@ BEGIN
     SELECT id INTO cook_lounge FROM roles WHERE name = 'Cook (Lounge)' LIMIT 1;
     SELECT id INTO cook_eatery FROM roles WHERE name = 'Cook (Eatery)' LIMIT 1;
     SELECT id INTO security_role FROM roles WHERE name = 'Security' LIMIT 1;
-    SELECT id INTO cinema_mgr FROM roles WHERE name = 'Manager (Cinema)' LIMIT 1;
+    SELECT id INTO cinema_supervisor FROM roles WHERE name = 'Cinema Supervisor' LIMIT 1;
     
     -- Update CEO
     UPDATE users SET role_id = ceo_role WHERE email = 'ceo@acemarket.com';
@@ -53,8 +53,8 @@ BEGIN
     -- Update Floor Manager - Lounge
     UPDATE users SET role_id = floor_mgr_lounge WHERE email = 'fm.lounge.bodija@acemarket.com';
     
-    -- Update Floor Manager - Cinema (using Cinema Manager role)
-    UPDATE users SET role_id = cinema_mgr WHERE email IN (
+    -- Update Floor Manager - Cinema (using Cinema Supervisor role)
+    UPDATE users SET role_id = cinema_supervisor WHERE email IN (
         'fm.cinema.oyo@acemarket.com',
         'fm.arcade.akobo@acemarket.com',
         'fm.bakery.oluyole@acemarket.com'

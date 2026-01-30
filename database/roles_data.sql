@@ -170,9 +170,14 @@ FROM departments WHERE name = 'Lounge';
 -- FUN & ARCADE DEPARTMENT ROLES
 -- ============================================
 
+-- Department Manager (Main F&A Manager)
+INSERT INTO roles (name, category, department_id, description) 
+SELECT 'Fun & Arcade Department Manager', 'admin', id, 'Main manager for Fun & Arcade department'
+FROM departments WHERE name = 'Fun & Arcade';
+
 -- Cinema Sub-department
 INSERT INTO roles (name, category, department_id, sub_department_id, description) 
-SELECT 'Cinema Manager', 'admin', d.id, sd.id, 'Cinema operations manager'
+SELECT 'Cinema Supervisor', 'admin', d.id, sd.id, 'Cinema operations supervisor'
 FROM departments d, sub_departments sd 
 WHERE d.name = 'Fun & Arcade' AND sd.name = 'Cinema';
 
@@ -183,7 +188,7 @@ WHERE d.name = 'Fun & Arcade' AND sd.name = 'Cinema';
 
 -- Photo Studio Sub-department
 INSERT INTO roles (name, category, department_id, sub_department_id, description) 
-SELECT 'Photo Studio Manager', 'admin', d.id, sd.id, 'Photo studio manager'
+SELECT 'Photo Studio Supervisor', 'admin', d.id, sd.id, 'Photo studio supervisor'
 FROM departments d, sub_departments sd 
 WHERE d.name = 'Fun & Arcade' AND sd.name = 'Photo Studio';
 
@@ -199,7 +204,7 @@ WHERE d.name = 'Fun & Arcade' AND sd.name = 'Photo Studio';
 
 -- Saloon Sub-department
 INSERT INTO roles (name, category, department_id, sub_department_id, description) 
-SELECT 'Saloon Manager', 'admin', d.id, sd.id, 'Saloon operations manager'
+SELECT 'Saloon Supervisor', 'admin', d.id, sd.id, 'Saloon operations supervisor'
 FROM departments d, sub_departments sd 
 WHERE d.name = 'Fun & Arcade' AND sd.name = 'Saloon';
 
@@ -220,7 +225,7 @@ WHERE d.name = 'Fun & Arcade' AND sd.name = 'Saloon';
 
 -- Arcade and Kiddies Park Sub-department
 INSERT INTO roles (name, category, department_id, sub_department_id, description) 
-SELECT 'Arcade Manager', 'admin', d.id, sd.id, 'Arcade and kiddies park manager'
+SELECT 'Arcade Supervisor', 'admin', d.id, sd.id, 'Arcade and kiddies park supervisor'
 FROM departments d, sub_departments sd 
 WHERE d.name = 'Fun & Arcade' AND sd.name = 'Arcade and Kiddies Park';
 
@@ -236,7 +241,7 @@ WHERE d.name = 'Fun & Arcade' AND sd.name = 'Arcade and Kiddies Park';
 
 -- Casino Sub-department
 INSERT INTO roles (name, category, department_id, sub_department_id, description) 
-SELECT 'Casino Manager', 'admin', d.id, sd.id, 'Casino operations manager'
+SELECT 'Casino Supervisor', 'admin', d.id, sd.id, 'Casino operations supervisor'
 FROM departments d, sub_departments sd 
 WHERE d.name = 'Fun & Arcade' AND sd.name = 'Casino';
 

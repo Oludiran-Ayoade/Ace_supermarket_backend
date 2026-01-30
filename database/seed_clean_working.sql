@@ -165,13 +165,13 @@ FROM users u INNER JOIN roles r ON u.role_id = r.id WHERE r.name LIKE 'Floor Man
 -- SUB-DEPARTMENT MANAGERS (15 staff - Cinema, Photo Studio, Saloon, Arcade, Casino)
 -- ============================================================================
 
--- Cinema Managers (3)
+-- Cinema Supervisors (3)
 INSERT INTO users (id, email, password_hash, full_name, gender, date_of_birth, phone_number, 
     employee_id, role_id, department_id, sub_department_id, branch_id, date_joined, current_salary, is_active, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'cinema.abeokuta@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Tayo Adeyemi', 'Male', '1988-03-15', '+234-803-500-0001', 'ACE-CIN-001',
-     (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+     (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Cinema'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -179,7 +179,7 @@ VALUES
     
     (gen_random_uuid(), 'cinema.bodija@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Miss Funke Oladele', 'Female', '1990-07-22', '+234-803-500-0002', 'ACE-CIN-002',
-     (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+     (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Cinema'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -187,19 +187,19 @@ VALUES
     
     (gen_random_uuid(), 'cinema.akobo@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Segun Afolabi', 'Male', '1987-11-10', '+234-803-500-0003', 'ACE-CIN-003',
-     (SELECT id FROM roles WHERE name = 'Manager (Cinema)'),
+     (SELECT id FROM roles WHERE name = 'Cinema Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Cinema'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
      DATE '2022-07-01', 350000.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Photo Studio Managers (3)
+-- Photo Studio Supervisors (3)
 INSERT INTO users (id, email, password_hash, full_name, gender, date_of_birth, phone_number, 
     employee_id, role_id, department_id, sub_department_id, branch_id, date_joined, current_salary, is_active, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'photostudio.abeokuta@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mrs. Kemi Adebayo', 'Female', '1989-05-18', '+234-803-500-0004', 'ACE-PHO-001',
-     (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+     (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -207,7 +207,7 @@ VALUES
     
     (gen_random_uuid(), 'photostudio.bodija@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Wale Ogunbiyi', 'Male', '1986-09-25', '+234-803-500-0005', 'ACE-PHO-002',
-     (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+     (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -215,19 +215,19 @@ VALUES
     
     (gen_random_uuid(), 'photostudio.akobo@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Miss Shade Akinola', 'Female', '1991-12-08', '+234-803-500-0006', 'ACE-PHO-003',
-     (SELECT id FROM roles WHERE name = 'Manager (Photo Studio)'),
+     (SELECT id FROM roles WHERE name = 'Photo Studio Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Photo Studio'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
      DATE '2022-08-15', 340000.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Saloon Managers (3)
+-- Saloon Supervisors (3)
 INSERT INTO users (id, email, password_hash, full_name, gender, date_of_birth, phone_number, 
     employee_id, role_id, department_id, sub_department_id, branch_id, date_joined, current_salary, is_active, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'saloon.abeokuta@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Miss Blessing Okoro', 'Female', '1992-02-14', '+234-803-500-0007', 'ACE-SAL-001',
-     (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+     (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Saloon'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -235,7 +235,7 @@ VALUES
     
     (gen_random_uuid(), 'saloon.bodija@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Gbenga Fashola', 'Male', '1988-06-30', '+234-803-500-0008', 'ACE-SAL-002',
-     (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+     (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Saloon'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -243,19 +243,19 @@ VALUES
     
     (gen_random_uuid(), 'saloon.akobo@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mrs. Yetunde Olatunji', 'Female', '1987-10-05', '+234-803-500-0009', 'ACE-SAL-003',
-     (SELECT id FROM roles WHERE name = 'Manager (Saloon)'),
+     (SELECT id FROM roles WHERE name = 'Saloon Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Saloon'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
      DATE '2022-05-20', 330000.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Arcade Managers (3)
+-- Arcade Supervisors (3)
 INSERT INTO users (id, email, password_hash, full_name, gender, date_of_birth, phone_number, 
     employee_id, role_id, department_id, sub_department_id, branch_id, date_joined, current_salary, is_active, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'arcade.abeokuta@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Kunle Adeleke', 'Male', '1990-04-12', '+234-803-500-0010', 'ACE-ARC-001',
-     (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+     (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -263,7 +263,7 @@ VALUES
     
     (gen_random_uuid(), 'arcade.bodija@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Miss Zainab Ibrahim', 'Female', '1991-08-20', '+234-803-500-0011', 'ACE-ARC-002',
-     (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+     (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -271,19 +271,19 @@ VALUES
     
     (gen_random_uuid(), 'arcade.akobo@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Biodun Alabi', 'Male', '1989-11-28', '+234-803-500-0012', 'ACE-ARC-003',
-     (SELECT id FROM roles WHERE name = 'Manager (Arcade & Kiddies Park)'),
+     (SELECT id FROM roles WHERE name = 'Arcade Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Arcade & Kiddies Park'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
      DATE '2022-06-18', 340000.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Casino Managers (3)
+-- Casino Supervisors (3)
 INSERT INTO users (id, email, password_hash, full_name, gender, date_of_birth, phone_number, 
     employee_id, role_id, department_id, sub_department_id, branch_id, date_joined, current_salary, is_active, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'casino.abeokuta@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Chidi Okonkwo', 'Male', '1987-03-22', '+234-803-500-0013', 'ACE-CAS-001',
-     (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+     (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Casino'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Abeokuta'),
@@ -291,7 +291,7 @@ VALUES
     
     (gen_random_uuid(), 'casino.bodija@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mrs. Amaka Nwosu', 'Female', '1988-07-16', '+234-803-500-0014', 'ACE-CAS-002',
-     (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+     (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Casino'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Bodija'),
@@ -299,28 +299,28 @@ VALUES
     
     (gen_random_uuid(), 'casino.akobo@acesupermarket.com', '$2a$10$ElkYaw5rar.b92GC6Fp/oeuyQmYleDeQMPhpaO4ngs5HFdlTnSRwS',
      'Mr. Lanre Adebisi', 'Male', '1990-09-12', '+234-803-500-0015', 'ACE-CAS-003',
-     (SELECT id FROM roles WHERE name = 'Manager (Casino)'),
+     (SELECT id FROM roles WHERE name = 'Casino Supervisor'),
      (SELECT id FROM departments WHERE name = 'Fun & Arcade'),
      (SELECT id FROM sub_departments WHERE name = 'Casino'),
      (SELECT id FROM branches WHERE name = 'Ace Mall, Akobo'),
      DATE '2022-07-30', 360000.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Create shift templates for sub-department managers (they function like floor managers)
+-- Create shift templates for sub-department supervisors (they function like floor managers)
 INSERT INTO shift_templates (id, floor_manager_id, shift_type, start_time, end_time, is_default, created_at, updated_at)
 SELECT 
     gen_random_uuid(), u.id, 'day'::shift_type, '08:00:00'::TIME, '16:00:00'::TIME, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 FROM users u INNER JOIN roles r ON u.role_id = r.id 
-WHERE r.name IN ('Manager (Cinema)', 'Manager (Photo Studio)', 'Manager (Saloon)', 'Manager (Arcade & Kiddies Park)', 'Manager (Casino)')
+WHERE r.name IN ('Cinema Supervisor', 'Photo Studio Supervisor', 'Saloon Supervisor', 'Arcade Supervisor', 'Casino Supervisor')
 UNION ALL
 SELECT 
     gen_random_uuid(), u.id, 'afternoon'::shift_type, '14:00:00'::TIME, '22:00:00'::TIME, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 FROM users u INNER JOIN roles r ON u.role_id = r.id 
-WHERE r.name IN ('Manager (Cinema)', 'Manager (Photo Studio)', 'Manager (Saloon)', 'Manager (Arcade & Kiddies Park)', 'Manager (Casino)')
+WHERE r.name IN ('Cinema Supervisor', 'Photo Studio Supervisor', 'Saloon Supervisor', 'Arcade Supervisor', 'Casino Supervisor')
 UNION ALL
 SELECT 
     gen_random_uuid(), u.id, 'night'::shift_type, '22:00:00'::TIME, '06:00:00'::TIME, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 FROM users u INNER JOIN roles r ON u.role_id = r.id 
-WHERE r.name IN ('Manager (Cinema)', 'Manager (Photo Studio)', 'Manager (Saloon)', 'Manager (Arcade & Kiddies Park)', 'Manager (Casino)');
+WHERE r.name IN ('Cinema Supervisor', 'Photo Studio Supervisor', 'Saloon Supervisor', 'Arcade Supervisor', 'Casino Supervisor');
 
 -- ============================================================================
 -- GENERAL STAFF - CASHIERS (30 staff - Format: cashier.{branch}{number}@)
