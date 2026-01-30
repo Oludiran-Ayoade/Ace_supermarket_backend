@@ -15,11 +15,11 @@ BEGIN
     SELECT id INTO fun_arcade_dept_id FROM departments WHERE name = 'Fun & Arcade';
     
     -- Get sub-department IDs
-    SELECT id INTO cinema_subdept_id FROM sub_departments WHERE name = 'Cinema' AND department_id = fun_arcade_dept_id;
-    SELECT id INTO photo_subdept_id FROM sub_departments WHERE name = 'Photo Studio' AND department_id = fun_arcade_dept_id;
-    SELECT id INTO saloon_subdept_id FROM sub_departments WHERE name = 'Saloon' AND department_id = fun_arcade_dept_id;
-    SELECT id INTO arcade_subdept_id FROM sub_departments WHERE name = 'Arcade and Kiddies Park' AND department_id = fun_arcade_dept_id;
-    SELECT id INTO casino_subdept_id FROM sub_departments WHERE name = 'Casino' AND department_id = fun_arcade_dept_id;
+    SELECT id INTO cinema_subdept_id FROM sub_departments WHERE name = 'Cinema' AND parent_department_id = fun_arcade_dept_id;
+    SELECT id INTO photo_subdept_id FROM sub_departments WHERE name = 'Photo Studio' AND parent_department_id = fun_arcade_dept_id;
+    SELECT id INTO saloon_subdept_id FROM sub_departments WHERE name = 'Saloon' AND parent_department_id = fun_arcade_dept_id;
+    SELECT id INTO arcade_subdept_id FROM sub_departments WHERE name = 'Arcade and Kiddies Park' AND parent_department_id = fun_arcade_dept_id;
+    SELECT id INTO casino_subdept_id FROM sub_departments WHERE name = 'Casino' AND parent_department_id = fun_arcade_dept_id;
 
     -- Update Cinema: Manager → Supervisor
     UPDATE roles 
