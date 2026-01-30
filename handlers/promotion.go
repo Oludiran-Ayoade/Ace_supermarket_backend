@@ -52,16 +52,21 @@ func PromoteStaff(c *gin.Context) {
 		return
 	}
 
-	// Get current staff details
+	// Get current staff details including branch and department
 	var currentRoleID string
 	var currentSalary float64
 	var currentRoleName, staffName string
+	var currentBranchID, currentDepartmentID, currentBranchName sql.NullString
+	var dateJoined sql.NullTime
 	err = db.QueryRow(`
-		SELECT u.role_id, COALESCE(u.current_salary, 0), r.name, u.full_name
+		SELECT u.role_id, COALESCE(u.current_salary, 0), r.name, u.full_name,
+		       u.branch_id, u.department_id, b.name, u.date_joined
 		FROM users u
 		INNER JOIN roles r ON u.role_id = r.id
+		LEFT JOIN branches b ON u.branch_id = b.id
 		WHERE u.id = $1
-	`, req.StaffID).Scan(&currentRoleID, &currentSalary, &currentRoleName, &staffName)
+	`, req.StaffID).Scan(&currentRoleID, &currentSalary, &currentRoleName, &staffName,
+		&currentBranchID, &currentDepartmentID, &currentBranchName, &dateJoined)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Staff not found"})
@@ -76,7 +81,20 @@ func PromoteStaff(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	// Insert into promotion_history
+	// Determine new branch and department IDs
+	var newBranchID, newDepartmentID interface{}
+	if req.BranchID != nil {
+		newBranchID = *req.BranchID
+	} else if currentBranchID.Valid {
+		newBranchID = currentBranchID.String
+	}
+	if req.DepartmentID != nil {
+		newDepartmentID = *req.DepartmentID
+	} else if currentDepartmentID.Valid {
+		newDepartmentID = currentDepartmentID.String
+	}
+
+	// Insert into promotion_history with branch and department info
 	var promotionID int
 	err = tx.QueryRow(`
 		INSERT INTO promotion_history (
@@ -85,10 +103,15 @@ func PromoteStaff(c *gin.Context) {
 			new_role_id,
 			previous_salary,
 			new_salary,
+			previous_branch_id,
+			new_branch_id,
+			previous_department_id,
+			new_department_id,
 			promotion_date,
 			promoted_by,
-			reason
-		) VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6, $7)
+			reason,
+			created_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_DATE, $10, $11, CURRENT_TIMESTAMP)
 		RETURNING id
 	`, req.StaffID, currentRoleID,
 		func() interface{} {
@@ -97,11 +120,51 @@ func PromoteStaff(c *gin.Context) {
 			}
 			return currentRoleID
 		}(),
-		currentSalary, req.NewSalary, promoterID, req.Reason).Scan(&promotionID)
+		currentSalary, req.NewSalary,
+		func() interface{} {
+			if currentBranchID.Valid {
+				return currentBranchID.String
+			}
+			return nil
+		}(),
+		newBranchID,
+		func() interface{} {
+			if currentDepartmentID.Valid {
+				return currentDepartmentID.String
+			}
+			return nil
+		}(),
+		newDepartmentID,
+		promoterID, req.Reason).Scan(&promotionID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to record promotion: " + err.Error()})
 		return
+	}
+
+	// Auto-add previous position to work_experience
+	// This records the staff's previous role at Ace Mall
+	if currentBranchName.Valid {
+		startDate := ""
+		if dateJoined.Valid {
+			startDate = dateJoined.Time.Format("2006-01-02")
+		}
+		endDate := time.Now().Format("2006-01-02")
+
+		_, err = tx.Exec(`
+			INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, role_id, branch_id, created_at, updated_at)
+			VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		`, req.StaffID, "Ace Mall - "+currentBranchName.String, currentRoleName, startDate, endDate,
+			currentRoleID, func() interface{} {
+				if currentBranchID.Valid {
+					return currentBranchID.String
+				}
+				return nil
+			}())
+		if err != nil {
+			fmt.Printf("Warning: Failed to add work experience: %v\n", err)
+			// Don't fail the whole promotion for this
+		}
 	}
 
 	// Update user record
@@ -186,16 +249,20 @@ func GetPromotionHistory(c *gin.Context) {
 		SELECT 
 			ph.id,
 			ph.promotion_date,
-			pr.name as previous_role,
-			nr.name as new_role,
+			COALESCE(pr.name, '') as previous_role,
+			COALESCE(nr.name, '') as new_role,
 			ph.previous_salary,
 			ph.new_salary,
-			ph.reason,
-			u.full_name as promoted_by
+			COALESCE(ph.reason, '') as reason,
+			COALESCE(u.full_name, '') as promoted_by,
+			COALESCE(pb.name, '') as previous_branch,
+			COALESCE(nb.name, '') as new_branch
 		FROM promotion_history ph
 		LEFT JOIN roles pr ON ph.previous_role_id = pr.id
 		LEFT JOIN roles nr ON ph.new_role_id = nr.id
-		INNER JOIN users u ON ph.promoted_by = u.id
+		LEFT JOIN users u ON ph.promoted_by = u.id
+		LEFT JOIN branches pb ON ph.previous_branch_id = pb.id
+		LEFT JOIN branches nb ON ph.new_branch_id = nb.id
 		WHERE ph.user_id = $1
 		ORDER BY ph.promotion_date DESC
 	`
@@ -211,16 +278,33 @@ func GetPromotionHistory(c *gin.Context) {
 	for rows.Next() {
 		var id, previousSalary, newSalary int
 		var promotionDate time.Time
-		var previousRole, newRole, reason, promotedBy string
+		var previousRole, newRole, reason, promotedBy, previousBranch, newBranch string
 
 		err := rows.Scan(&id, &promotionDate, &previousRole, &newRole,
-			&previousSalary, &newSalary, &reason, &promotedBy)
+			&previousSalary, &newSalary, &reason, &promotedBy, &previousBranch, &newBranch)
 		if err != nil {
+			fmt.Printf("Error scanning promotion history: %v\n", err)
 			continue
 		}
 
 		increase := newSalary - previousSalary
-		increasePercent := float64(increase) / float64(previousSalary) * 100
+		var increasePercent float64
+		if previousSalary > 0 {
+			increasePercent = float64(increase) / float64(previousSalary) * 100
+		}
+
+		// Determine promotion type
+		promotionType := "Salary Increase"
+		if previousRole != newRole {
+			promotionType = "Promotion"
+		}
+		if previousBranch != newBranch && previousBranch != "" && newBranch != "" {
+			if previousRole == newRole {
+				promotionType = "Transfer"
+			} else {
+				promotionType = "Transfer & Promotion"
+			}
+		}
 
 		promotions = append(promotions, map[string]interface{}{
 			"id":               id,
@@ -233,6 +317,9 @@ func GetPromotionHistory(c *gin.Context) {
 			"increase_percent": increasePercent,
 			"reason":           reason,
 			"promoted_by":      promotedBy,
+			"previous_branch":  previousBranch,
+			"new_branch":       newBranch,
+			"type":             promotionType,
 		})
 	}
 
