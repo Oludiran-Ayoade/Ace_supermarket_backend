@@ -96,6 +96,26 @@ func PromoteStaff(c *gin.Context) {
 
 	// Insert into promotion_history with branch and department info
 	var promotionID int
+
+	// Prepare values for logging
+	newRoleIDForInsert := currentRoleID
+	if req.NewRoleID != nil {
+		newRoleIDForInsert = *req.NewRoleID
+	}
+
+	previousBranchIDForInsert := interface{}(nil)
+	if currentBranchID.Valid {
+		previousBranchIDForInsert = currentBranchID.String
+	}
+
+	previousDeptIDForInsert := interface{}(nil)
+	if currentDepartmentID.Valid {
+		previousDeptIDForInsert = currentDepartmentID.String
+	}
+
+	fmt.Printf("📝 Inserting promotion history: staff=%s, prev_role=%s, new_role=%s, prev_branch=%v, new_branch=%v\n",
+		req.StaffID, currentRoleID, newRoleIDForInsert, previousBranchIDForInsert, newBranchID)
+
 	err = tx.QueryRow(`
 		INSERT INTO promotion_history (
 			user_id,
@@ -113,34 +133,21 @@ func PromoteStaff(c *gin.Context) {
 			created_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_DATE, $10, $11, CURRENT_TIMESTAMP)
 		RETURNING id
-	`, req.StaffID, currentRoleID,
-		func() interface{} {
-			if req.NewRoleID != nil {
-				return *req.NewRoleID
-			}
-			return currentRoleID
-		}(),
+	`, req.StaffID, currentRoleID, newRoleIDForInsert,
 		currentSalary, req.NewSalary,
-		func() interface{} {
-			if currentBranchID.Valid {
-				return currentBranchID.String
-			}
-			return nil
-		}(),
+		previousBranchIDForInsert,
 		newBranchID,
-		func() interface{} {
-			if currentDepartmentID.Valid {
-				return currentDepartmentID.String
-			}
-			return nil
-		}(),
+		previousDeptIDForInsert,
 		newDepartmentID,
 		promoterID, req.Reason).Scan(&promotionID)
 
 	if err != nil {
+		fmt.Printf("❌ Failed to insert promotion history: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to record promotion: " + err.Error()})
 		return
 	}
+
+	fmt.Printf("✅ Promotion history inserted with ID: %d\n", promotionID)
 
 	// Auto-add previous position to work_experience
 	// This records the staff's previous role at Ace Mall
