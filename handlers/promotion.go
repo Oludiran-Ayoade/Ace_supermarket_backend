@@ -327,7 +327,8 @@ func GetPromotionHistory(c *gin.Context) {
 
 	promotions := []map[string]interface{}{}
 	for rows.Next() {
-		var id, previousSalary, newSalary int
+		var id int
+		var previousSalary, newSalary float64
 		var promotionDate time.Time
 		var previousRole, newRole, reason, promotedBy, previousBranch, newBranch string
 
@@ -341,7 +342,7 @@ func GetPromotionHistory(c *gin.Context) {
 		increase := newSalary - previousSalary
 		var increasePercent float64
 		if previousSalary > 0 {
-			increasePercent = float64(increase) / float64(previousSalary) * 100
+			increasePercent = (increase / previousSalary) * 100
 		}
 
 		// Determine promotion type
