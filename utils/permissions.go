@@ -188,7 +188,7 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 	`
 
 	query := `SELECT ` + baseFields
-	if permissionLevel == PermissionViewFull {
+	if permissionLevel == PermissionViewFull || permissionLevel == PermissionViewTeam {
 		query += documentFields
 	}
 	query += `
@@ -201,7 +201,7 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 	`
 
 	var err error
-	if permissionLevel == PermissionViewFull {
+	if permissionLevel == PermissionViewFull || permissionLevel == PermissionViewTeam {
 		// Scan with documents
 		err = db.QueryRow(query, userID).Scan(
 			&user.ID, &user.Email, &user.FullName, &user.Gender, &user.DateOfBirth, &user.MaritalStatus,
@@ -253,8 +253,9 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 		return nil, err
 	}
 
-	// Only fetch Next of Kin and Guarantors for PermissionViewFull (HR/CEO/COO)
-	if permissionLevel != PermissionViewFull {
+	// Fetch Next of Kin and Guarantors for view_full and view_team permissions
+	// This allows HR/CEO/COO and managers (Branch Managers, Floor Managers) to see this info
+	if permissionLevel != PermissionViewFull && permissionLevel != PermissionViewTeam {
 		return user, nil
 	}
 
@@ -414,7 +415,7 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 			var companyName, position string
 			var startDate, endDate sql.NullString
 			var responsibilities sql.NullString
-			
+
 			if err := workExpRows.Scan(&companyName, &position, &startDate, &endDate, &responsibilities); err == nil {
 				exp := map[string]interface{}{
 					"company_name": companyName,
