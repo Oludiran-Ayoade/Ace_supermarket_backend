@@ -835,7 +835,7 @@ func UpdateWorkExperience(c *gin.Context) {
 // UpdateRoleHistory updates role history (roles held at Ace Mall) for a staff member
 func UpdateRoleHistory(c *gin.Context) {
 	db := config.DB
-	userID := c.Param("id")
+	userID := c.Param("user_id")
 
 	var req struct {
 		RoleHistory []struct {
