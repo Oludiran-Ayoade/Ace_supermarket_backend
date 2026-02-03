@@ -834,7 +834,7 @@ func UpdateWorkExperience(c *gin.Context) {
 
 // UpdateRoleHistory updates role history (roles held at Ace Mall) for a staff member
 func UpdateRoleHistory(c *gin.Context) {
-	db := config.DB
+	db := c.MustGet("db").(*sql.DB)
 	userID := c.Param("user_id")
 
 	var req struct {
@@ -852,10 +852,6 @@ func UpdateRoleHistory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Get current user for created_by
-	currentUser, _ := c.Get("user")
-	currentUserID := currentUser.(map[string]interface{})["id"].(string)
 
 	// Start a transaction
 	tx, err := db.Begin()
@@ -890,7 +886,7 @@ func UpdateRoleHistory(c *gin.Context) {
 			_, err := tx.Exec(`
 				INSERT INTO role_history (id, user_id, role_id, department_id, branch_id, start_date, end_date, promotion_reason, created_by, created_at)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-			`, roleUUID, userID, role.RoleID, role.DepartmentID, role.BranchID, role.StartDate, endDate, role.PromotionReason, currentUserID, now)
+			`, roleUUID, userID, role.RoleID, role.DepartmentID, role.BranchID, role.StartDate, endDate, role.PromotionReason, nil, now)
 			if err != nil {
 				fmt.Printf("Error inserting role history: %v\n", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert role history: " + err.Error()})
