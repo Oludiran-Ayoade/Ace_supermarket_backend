@@ -487,6 +487,48 @@ func GetAllPromotions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"promotions": promotions})
 }
 
+// DeletePromotion allows HR/CEO to delete a promotion history record
+func DeletePromotion(c *gin.Context) {
+	db := c.MustGet("db").(*sql.DB)
+	requesterID := c.GetString("user_id")
+	promotionID := c.Param("promotion_id")
+
+	// Verify requester has permission (HR, CEO, Chairman)
+	var roleName string
+	err := db.QueryRow(`
+		SELECT r.name
+		FROM users u
+		INNER JOIN roles r ON u.role_id = r.id
+		WHERE u.id = $1
+	`, requesterID).Scan(&roleName)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to verify permissions"})
+		return
+	}
+
+	// Only HR, CEO, and Chairman can delete promotions
+	if roleName != "Human Resource" && roleName != "Chief Executive Officer" && roleName != "Chairman" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only HR, CEO, or Chairman can delete promotion records"})
+		return
+	}
+
+	// Delete the promotion record
+	result, err := db.Exec(`DELETE FROM promotion_history WHERE id = $1`, promotionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete promotion record"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Promotion record not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Promotion record deleted successfully"})
+}
+
 func isAuthorizedToPromote(roleName, roleCategory string) bool {
 	// Allow senior_admin category (HR, CEO, Chairman, COO)
 	if roleCategory == "senior_admin" {

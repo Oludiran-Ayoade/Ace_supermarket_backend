@@ -167,6 +167,7 @@ func main() {
 			// Promotion routes
 			protected.POST("/promotions", handlers.PromoteStaff)                         // HR/CEO promotes staff
 			protected.GET("/promotions/history/:staff_id", handlers.GetPromotionHistory) // Get promotion history for staff
+			protected.DELETE("/promotions/:promotion_id", handlers.DeletePromotion)      // HR/CEO can delete promotion records
 
 			// Notifications routes (with caching)
 			notifCache := middleware.CacheMiddleware(5 * time.Minute)
