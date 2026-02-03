@@ -205,6 +205,7 @@ func main() {
 			{
 				hr.GET("/staff", handlers.GetAllStaff)
 				hr.GET("/stats", handlers.GetStaffStats)
+				hr.GET("/promotions", handlers.GetAllPromotions)                                   // Get all promotion history
 				hr.POST("/staff", handlers.CreateStaffByHR)                                        // HR can create any type of staff
 				hr.POST("/staff/bulk-upload", handlers.BulkUploadStaff)                            // Bulk upload staff via CSV
 				hr.POST("/documents/bulk-upload", handlers.BulkUploadDocuments)                    // Bulk upload staff documents

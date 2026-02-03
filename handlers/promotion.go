@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"ace-mall-backend/config"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -376,6 +377,114 @@ func GetPromotionHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, promotions)
+}
+
+// GetAllPromotions returns all promotion history (for HR/CEO/Chairman)
+func GetAllPromotions(c *gin.Context) {
+	db := config.DB
+	userID := c.GetString("user_id")
+
+	// Verify user has permission (HR, CEO, Chairman)
+	var roleName, roleCategory string
+	err := db.QueryRow(`
+		SELECT r.name, r.category
+		FROM users u
+		INNER JOIN roles r ON u.role_id = r.id
+		WHERE u.id = $1
+	`, userID).Scan(&roleName, &roleCategory)
+
+	if err != nil || !isAuthorizedToPromote(roleName, roleCategory) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+		return
+	}
+
+	query := `
+		SELECT 
+			ph.id,
+			ph.user_id,
+			COALESCE(u.full_name, '') as staff_name,
+			ph.promotion_date,
+			COALESCE(pr.name, '') as previous_role,
+			COALESCE(nr.name, '') as new_role,
+			ph.previous_salary,
+			ph.new_salary,
+			COALESCE(ph.reason, '') as reason,
+			COALESCE(promoter.full_name, '') as promoted_by,
+			COALESCE(pb.name, '') as previous_branch,
+			COALESCE(nb.name, '') as new_branch
+		FROM promotion_history ph
+		LEFT JOIN users u ON ph.user_id = u.id
+		LEFT JOIN roles pr ON ph.previous_role_id = pr.id
+		LEFT JOIN roles nr ON ph.new_role_id = nr.id
+		LEFT JOIN users promoter ON ph.promoted_by = promoter.id
+		LEFT JOIN branches pb ON ph.previous_branch_id = pb.id
+		LEFT JOIN branches nb ON ph.new_branch_id = nb.id
+		ORDER BY ph.promotion_date DESC, ph.id DESC
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		fmt.Printf("❌ Error querying all promotions: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch promotions"})
+		return
+	}
+	defer rows.Close()
+
+	promotions := []map[string]interface{}{}
+	for rows.Next() {
+		var id int
+		var userID string
+		var staffName string
+		var previousSalary, newSalary float64
+		var promotionDate time.Time
+		var previousRole, newRole, reason, promotedBy, previousBranch, newBranch string
+
+		err := rows.Scan(&id, &userID, &staffName, &promotionDate, &previousRole, &newRole,
+			&previousSalary, &newSalary, &reason, &promotedBy, &previousBranch, &newBranch)
+		if err != nil {
+			fmt.Printf("Error scanning promotion: %v\n", err)
+			continue
+		}
+
+		increase := newSalary - previousSalary
+		var increasePercent float64
+		if previousSalary > 0 {
+			increasePercent = (increase / previousSalary) * 100
+		}
+
+		// Determine promotion type
+		promotionType := "Salary Increase"
+		if previousRole != newRole {
+			promotionType = "Promotion"
+		}
+		if previousBranch != newBranch && previousBranch != "" && newBranch != "" {
+			if previousRole == newRole {
+				promotionType = "Transfer"
+			} else {
+				promotionType = "Transfer & Promotion"
+			}
+		}
+
+		promotions = append(promotions, map[string]interface{}{
+			"id":               id,
+			"user_id":          userID,
+			"staff_name":       staffName,
+			"date":             promotionDate.Format("2006-01-02"),
+			"previous_role":    previousRole,
+			"new_role":         newRole,
+			"previous_salary":  previousSalary,
+			"new_salary":       newSalary,
+			"increase":         increase,
+			"increase_percent": increasePercent,
+			"reason":           reason,
+			"promoted_by":      promotedBy,
+			"previous_branch":  previousBranch,
+			"new_branch":       newBranch,
+			"type":             promotionType,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"promotions": promotions})
 }
 
 func isAuthorizedToPromote(roleName, roleCategory string) bool {
