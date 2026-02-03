@@ -254,13 +254,16 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 	}
 
 	// Fetch Work Experience - available for all permission levels (including own profile)
+	fmt.Printf("🔍 Fetching work experience for user: %s\n", userID)
 	workExpRows, err := db.Query(`
 		SELECT company_name, position, start_date, end_date, responsibilities
 		FROM work_experience
 		WHERE user_id = $1
 		ORDER BY start_date DESC
 	`, userID)
-	if err == nil {
+	if err != nil {
+		fmt.Printf("❌ Error querying work experience: %v\n", err)
+	} else {
 		defer workExpRows.Close()
 		workExperience := []map[string]interface{}{}
 		for workExpRows.Next() {
@@ -283,8 +286,10 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 					exp["responsibilities"] = responsibilities.String
 				}
 				workExperience = append(workExperience, exp)
+				fmt.Printf("✅ Found work experience: %s at %s\n", companyName, position)
 			}
 		}
+		fmt.Printf("📊 Total work experience entries found: %d\n", len(workExperience))
 		if len(workExperience) > 0 {
 			user.WorkExperience = workExperience
 		}

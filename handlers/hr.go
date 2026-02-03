@@ -606,13 +606,20 @@ func CreateStaffByHR(c *gin.Context) {
 	}
 
 	// Insert Work Experience
-	for _, exp := range req.WorkExperience {
+	fmt.Printf("📥 Received %d work experience entries for user %s\n", len(req.WorkExperience), userUUID)
+	for i, exp := range req.WorkExperience {
+		fmt.Printf("📝 Work Experience #%d: Company=%s, Position=%s, Start=%s, End=%s\n", i+1, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate)
 		if exp.CompanyName != "" || exp.Position != "" {
 			expUUID := uuid.New().String()
-			config.DB.Exec(`
+			_, err := config.DB.Exec(`
 				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			`, expUUID, userUUID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
+			if err != nil {
+				fmt.Printf("❌ Failed to insert work experience: %v\n", err)
+			} else {
+				fmt.Printf("✅ Inserted work experience: %s at %s\n", exp.CompanyName, exp.Position)
+			}
 		}
 	}
 
