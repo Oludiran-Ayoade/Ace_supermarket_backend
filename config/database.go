@@ -40,6 +40,32 @@ func ConnectDatabase() error {
 	}
 
 	log.Println("✅ Database connected successfully")
+
+	// Auto-create work_experience table if it doesn't exist
+	_, err = DB.Exec(`
+		CREATE TABLE IF NOT EXISTS work_experience (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+			company_name VARCHAR(200) NOT NULL,
+			position VARCHAR(200) NOT NULL,
+			start_date DATE,
+			end_date DATE,
+			responsibilities TEXT,
+			role_id UUID,
+			branch_id UUID,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)
+	`)
+	if err != nil {
+		log.Printf("⚠️ Warning: Could not ensure work_experience table: %v", err)
+	} else {
+		log.Println("✅ work_experience table verified")
+	}
+
+	// Create index for faster lookups
+	DB.Exec(`CREATE INDEX IF NOT EXISTS idx_work_experience_user_id ON work_experience(user_id)`)
+
 	return nil
 }
 
