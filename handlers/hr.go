@@ -607,12 +607,32 @@ func CreateStaffByHR(c *gin.Context) {
 
 	// Insert Work Experience
 	for _, exp := range req.WorkExperience {
-		if exp.CompanyName != "" || exp.Position != "" {
+		if exp.CompanyName != "" && exp.Position != "" {
 			expUUID := uuid.New().String()
-			config.DB.Exec(`
-				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-			`, expUUID, userUUID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, now, now)
+
+			// Handle empty start_date - use current date as default
+			startDate := exp.StartDate
+			if startDate == "" {
+				startDate = now.Format("2006-01-02")
+			}
+
+			// Handle empty end_date - use NULL
+			var endDate interface{}
+			if exp.EndDate != "" {
+				endDate = exp.EndDate
+			} else {
+				endDate = nil
+			}
+
+			_, err := config.DB.Exec(`
+				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
+			`, expUUID, userUUID, exp.CompanyName, exp.Position, startDate, endDate, now)
+			if err != nil {
+				fmt.Printf("❌ Error inserting work experience for user %s: %v\n", userUUID, err)
+			} else {
+				fmt.Printf("✅ Inserted work experience: %s at %s\n", exp.Position, exp.CompanyName)
+			}
 		}
 	}
 
@@ -758,17 +778,33 @@ func UpdateWorkExperience(c *gin.Context) {
 	// Insert new work experience entries
 	now := time.Now()
 	for _, exp := range req.WorkExperience {
-		if exp.CompanyName != "" || exp.Position != "" {
+		if exp.CompanyName != "" && exp.Position != "" {
 			expUUID := uuid.New().String()
+
+			// Handle empty start_date - use current date as default
+			startDate := exp.StartDate
+			if startDate == "" {
+				startDate = now.Format("2006-01-02")
+			}
+
+			// Handle empty end_date - use NULL
+			var endDate interface{}
+			if exp.EndDate != "" {
+				endDate = exp.EndDate
+			} else {
+				endDate = nil
+			}
+
 			_, err := tx.Exec(`
-				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, role_id, branch_id, created_at, updated_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-			`, expUUID, userID, exp.CompanyName, exp.Position, exp.StartDate, exp.EndDate, exp.RoleID, exp.BranchID, now, now)
+				INSERT INTO work_experience (id, user_id, company_name, position, start_date, end_date, created_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
+			`, expUUID, userID, exp.CompanyName, exp.Position, startDate, endDate, now)
 			if err != nil {
 				fmt.Printf("Error inserting work experience: %v\n", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert work experience: " + err.Error()})
 				return
 			}
+			fmt.Printf("✅ Added work experience: %s at %s for user %s\n", exp.Position, exp.CompanyName, userID)
 		}
 	}
 

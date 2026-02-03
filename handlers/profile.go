@@ -283,6 +283,7 @@ func UpdateStaffProfile(c *gin.Context) {
 		DateOfBirth     *string  `json:"date_of_birth"`
 		Salary          *float64 `json:"current_salary"`
 		ProfileImageURL *string  `json:"profile_image_url"`
+		RoleID          *string  `json:"role_id"`
 
 		// Education
 		CourseOfStudy *string `json:"course_of_study"`
@@ -405,6 +406,11 @@ func UpdateStaffProfile(c *gin.Context) {
 	if req.ProfileImageURL != nil {
 		updates = append(updates, "profile_image_url = $"+fmt.Sprint(argCount))
 		args = append(args, *req.ProfileImageURL)
+		argCount++
+	}
+	if req.RoleID != nil && *req.RoleID != "" {
+		updates = append(updates, "role_id = $"+fmt.Sprint(argCount))
+		args = append(args, *req.RoleID)
 		argCount++
 	}
 	if req.CourseOfStudy != nil {
