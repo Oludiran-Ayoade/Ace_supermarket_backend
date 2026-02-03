@@ -831,3 +831,80 @@ func UpdateWorkExperience(c *gin.Context) {
 	fmt.Printf("✅ Updated work experience for user %s (%d entries)\n", userID, len(req.WorkExperience))
 	c.JSON(http.StatusOK, gin.H{"message": "Work experience updated successfully"})
 }
+
+// UpdateRoleHistory updates role history (roles held at Ace Mall) for a staff member
+func UpdateRoleHistory(c *gin.Context) {
+	db := config.DB
+	userID := c.Param("id")
+
+	var req struct {
+		RoleHistory []struct {
+			RoleID          string  `json:"role_id"`
+			DepartmentID    *string `json:"department_id"`
+			BranchID        *string `json:"branch_id"`
+			StartDate       string  `json:"start_date"`
+			EndDate         string  `json:"end_date"`
+			PromotionReason string  `json:"promotion_reason"`
+		} `json:"role_history"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get current user for created_by
+	currentUser, _ := c.Get("user")
+	currentUserID := currentUser.(map[string]interface{})["id"].(string)
+
+	// Start a transaction
+	tx, err := db.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback()
+
+	// Delete existing role history for this user
+	_, err = tx.Exec(`DELETE FROM role_history WHERE user_id = $1`, userID)
+	if err != nil {
+		fmt.Printf("Error clearing role history for user %s: %v\n", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing role history: " + err.Error()})
+		return
+	}
+
+	// Insert new role history entries
+	now := time.Now()
+	for _, role := range req.RoleHistory {
+		if role.RoleID != "" && role.StartDate != "" {
+			roleUUID := uuid.New().String()
+
+			// Handle empty end_date - use NULL (means still in this role or role ended)
+			var endDate interface{}
+			if role.EndDate != "" {
+				endDate = role.EndDate
+			} else {
+				endDate = nil
+			}
+
+			_, err := tx.Exec(`
+				INSERT INTO role_history (id, user_id, role_id, department_id, branch_id, start_date, end_date, promotion_reason, created_by, created_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			`, roleUUID, userID, role.RoleID, role.DepartmentID, role.BranchID, role.StartDate, endDate, role.PromotionReason, currentUserID, now)
+			if err != nil {
+				fmt.Printf("Error inserting role history: %v\n", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert role history: " + err.Error()})
+				return
+			}
+		}
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	fmt.Printf("✅ Updated role history for user %s (%d entries)\n", userID, len(req.RoleHistory))
+	c.JSON(http.StatusOK, gin.H{"message": "Role history updated successfully"})
+}

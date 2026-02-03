@@ -111,6 +111,9 @@ type User struct {
 	// Work Experience
 	WorkExperience []map[string]interface{} `json:"work_experience,omitempty"`
 
+	// Role History (roles held at Ace Mall)
+	RoleHistory []map[string]interface{} `json:"role_history,omitempty"`
+
 	// Status
 	IsActive          bool       `json:"is_active"`
 	IsTerminated      bool       `json:"is_terminated"`

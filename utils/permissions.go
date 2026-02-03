@@ -290,6 +290,54 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 		}
 	}
 
+	// Fetch Role History (roles held at Ace Mall) - available for all permission levels
+	roleHistoryRows, err := db.Query(`
+		SELECT rh.id, r.name as role_name, d.name as department_name, b.name as branch_name,
+		       rh.start_date, rh.end_date, rh.promotion_reason
+		FROM role_history rh
+		LEFT JOIN roles r ON rh.role_id = r.id
+		LEFT JOIN departments d ON rh.department_id = d.id
+		LEFT JOIN branches b ON rh.branch_id = b.id
+		WHERE rh.user_id = $1
+		ORDER BY rh.start_date DESC
+	`, userID)
+	if err == nil {
+		defer roleHistoryRows.Close()
+		roleHistory := []map[string]interface{}{}
+		for roleHistoryRows.Next() {
+			var id, roleName string
+			var departmentName, branchName sql.NullString
+			var startDate, endDate sql.NullString
+			var promotionReason sql.NullString
+
+			if err := roleHistoryRows.Scan(&id, &roleName, &departmentName, &branchName, &startDate, &endDate, &promotionReason); err == nil {
+				role := map[string]interface{}{
+					"id":        id,
+					"role_name": roleName,
+				}
+				if departmentName.Valid {
+					role["department_name"] = departmentName.String
+				}
+				if branchName.Valid {
+					role["branch_name"] = branchName.String
+				}
+				if startDate.Valid {
+					role["start_date"] = startDate.String
+				}
+				if endDate.Valid {
+					role["end_date"] = endDate.String
+				}
+				if promotionReason.Valid {
+					role["promotion_reason"] = promotionReason.String
+				}
+				roleHistory = append(roleHistory, role)
+			}
+		}
+		if len(roleHistory) > 0 {
+			user.RoleHistory = roleHistory
+		}
+	}
+
 	// Fetch Next of Kin and Guarantors for view_full and view_team permissions
 	// This allows HR/CEO/COO and managers (Branch Managers, Floor Managers) to see this info
 	if permissionLevel != PermissionViewFull && permissionLevel != PermissionViewTeam {
