@@ -588,19 +588,33 @@ func CreateStaffByHR(c *gin.Context) {
 			// Insert Guarantor 2 documents
 			if req.G2PassportURL != nil && *req.G2PassportURL != "" {
 				docUUID := uuid.New().String()
-				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+				_, err := config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
 					docUUID, g2UUID, "passport", *req.G2PassportURL, now, now)
-				fmt.Printf("✅ Saved Guarantor 2 passport: %s\n", *req.G2PassportURL)
+				if err != nil {
+					fmt.Printf("❌ Error saving Guarantor 2 passport: %v\n", err)
+				} else {
+					fmt.Printf("✅ Saved Guarantor 2 passport: %s\n", *req.G2PassportURL)
+				}
 			}
 			if req.G2NationalIDURL != nil && *req.G2NationalIDURL != "" {
 				docUUID := uuid.New().String()
-				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+				_, err := config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
 					docUUID, g2UUID, "national_id", *req.G2NationalIDURL, now, now)
+				if err != nil {
+					fmt.Printf("❌ Error saving Guarantor 2 national ID: %v\n", err)
+				} else {
+					fmt.Printf("✅ Saved Guarantor 2 national ID: %s\n", *req.G2NationalIDURL)
+				}
 			}
 			if req.G2WorkIDURL != nil && *req.G2WorkIDURL != "" {
 				docUUID := uuid.New().String()
-				config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+				_, err := config.DB.Exec(`INSERT INTO guarantor_documents (id, guarantor_id, document_type, file_path, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
 					docUUID, g2UUID, "work_id", *req.G2WorkIDURL, now, now)
+				if err != nil {
+					fmt.Printf("❌ Error saving Guarantor 2 work ID: %v\n", err)
+				} else {
+					fmt.Printf("✅ Saved Guarantor 2 work ID: %s\n", *req.G2WorkIDURL)
+				}
 			}
 		}
 	}
