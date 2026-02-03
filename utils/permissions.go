@@ -381,11 +381,20 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 	}
 
 	// Fetch Guarantor 2
+	fmt.Printf("🔍 Querying Guarantor 2 for user_id: %s\n", userID)
 	var g2ID, g2Name, g2Phone, g2Occupation, g2Relationship, g2Address, g2Email sql.NullString
-	db.QueryRow(`
+	err = db.QueryRow(`
 		SELECT id, full_name, phone_number, occupation, relationship, home_address, email
 		FROM guarantors WHERE user_id = $1 AND guarantor_number = 2 LIMIT 1
 	`, userID).Scan(&g2ID, &g2Name, &g2Phone, &g2Occupation, &g2Relationship, &g2Address, &g2Email)
+
+	if err != nil && err != sql.ErrNoRows {
+		fmt.Printf("❌ Error querying Guarantor 2: %v\n", err)
+	} else if err == sql.ErrNoRows {
+		fmt.Printf("⚠️ No Guarantor 2 record found for user %s\n", userID)
+	} else {
+		fmt.Printf("✅ Found Guarantor 2 record: ID=%v, Name=%v\n", g2ID.Valid, g2Name.Valid)
+	}
 
 	if g2Name.Valid {
 		user.Guarantor2Name = &g2Name.String
