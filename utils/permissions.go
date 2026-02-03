@@ -253,6 +253,43 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 		return nil, err
 	}
 
+	// Fetch Work Experience - available for all permission levels (including own profile)
+	workExpRows, err := db.Query(`
+		SELECT company_name, position, start_date, end_date, responsibilities
+		FROM work_experience
+		WHERE user_id = $1
+		ORDER BY start_date DESC
+	`, userID)
+	if err == nil {
+		defer workExpRows.Close()
+		workExperience := []map[string]interface{}{}
+		for workExpRows.Next() {
+			var companyName, position string
+			var startDate, endDate sql.NullString
+			var responsibilities sql.NullString
+
+			if err := workExpRows.Scan(&companyName, &position, &startDate, &endDate, &responsibilities); err == nil {
+				exp := map[string]interface{}{
+					"company_name": companyName,
+					"position":     position,
+				}
+				if startDate.Valid {
+					exp["start_date"] = startDate.String
+				}
+				if endDate.Valid {
+					exp["end_date"] = endDate.String
+				}
+				if responsibilities.Valid {
+					exp["responsibilities"] = responsibilities.String
+				}
+				workExperience = append(workExperience, exp)
+			}
+		}
+		if len(workExperience) > 0 {
+			user.WorkExperience = workExperience
+		}
+	}
+
 	// Fetch Next of Kin and Guarantors for view_full and view_team permissions
 	// This allows HR/CEO/COO and managers (Branch Managers, Floor Managers) to see this info
 	if permissionLevel != PermissionViewFull && permissionLevel != PermissionViewTeam {
@@ -398,43 +435,6 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 				}
 			}
 			fmt.Printf("📊 Total Guarantor 2 documents found: %d\n", docCount)
-		}
-	}
-
-	// Fetch Work Experience
-	workExpRows, err := db.Query(`
-		SELECT company_name, position, start_date, end_date, responsibilities
-		FROM work_experience
-		WHERE user_id = $1
-		ORDER BY start_date DESC
-	`, userID)
-	if err == nil {
-		defer workExpRows.Close()
-		workExperience := []map[string]interface{}{}
-		for workExpRows.Next() {
-			var companyName, position string
-			var startDate, endDate sql.NullString
-			var responsibilities sql.NullString
-
-			if err := workExpRows.Scan(&companyName, &position, &startDate, &endDate, &responsibilities); err == nil {
-				exp := map[string]interface{}{
-					"company_name": companyName,
-					"position":     position,
-				}
-				if startDate.Valid {
-					exp["start_date"] = startDate.String
-				}
-				if endDate.Valid {
-					exp["end_date"] = endDate.String
-				}
-				if responsibilities.Valid {
-					exp["responsibilities"] = responsibilities.String
-				}
-				workExperience = append(workExperience, exp)
-			}
-		}
-		if len(workExperience) > 0 {
-			user.WorkExperience = workExperience
 		}
 	}
 
