@@ -281,6 +281,7 @@ func UpdateStaffProfile(c *gin.Context) {
 		MaritalStatus   *string  `json:"marital_status"`
 		StateOfOrigin   *string  `json:"state_of_origin"`
 		DateOfBirth     *string  `json:"date_of_birth"`
+		DateJoined      *string  `json:"date_joined"`
 		Salary          *float64 `json:"current_salary"`
 		ProfileImageURL *string  `json:"profile_image_url"`
 		RoleID          *string  `json:"role_id"`
@@ -396,6 +397,11 @@ func UpdateStaffProfile(c *gin.Context) {
 	if req.DateOfBirth != nil && *req.DateOfBirth != "" {
 		updates = append(updates, "date_of_birth = $"+fmt.Sprint(argCount))
 		args = append(args, *req.DateOfBirth)
+		argCount++
+	}
+	if req.DateJoined != nil && *req.DateJoined != "" {
+		updates = append(updates, "date_joined = $"+fmt.Sprint(argCount))
+		args = append(args, *req.DateJoined)
 		argCount++
 	}
 	if req.Salary != nil {
