@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // GetProfile returns user profile based on permissions
@@ -290,6 +291,7 @@ func UpdateStaffProfile(c *gin.Context) {
 		CourseOfStudy *string `json:"course_of_study"`
 		Grade         *string `json:"grade"`
 		Institution   *string `json:"institution"`
+		ExamScores    *string `json:"exam_scores"`
 
 		// Document URLs
 		PassportURL           *string `json:"passport_url"`
@@ -433,6 +435,22 @@ func UpdateStaffProfile(c *gin.Context) {
 		updates = append(updates, "institution = $"+fmt.Sprint(argCount))
 		args = append(args, *req.Institution)
 		argCount++
+	}
+
+	// Handle exam scores update separately (in exam_scores table)
+	if req.ExamScores != nil && *req.ExamScores != "" {
+		// Delete existing exam scores
+		_, _ = db.Exec("DELETE FROM exam_scores WHERE user_id = $1", targetUserID)
+
+		// Insert new exam score
+		examScoreUUID := uuid.New().String()
+		_, examErr := db.Exec(`
+			INSERT INTO exam_scores (id, user_id, exam_type, score, created_at)
+			VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+		`, examScoreUUID, targetUserID, "General", *req.ExamScores)
+		if examErr != nil {
+			fmt.Printf("⚠️ Exam scores update failed: %v\n", examErr)
+		}
 	}
 
 	// Document URLs
