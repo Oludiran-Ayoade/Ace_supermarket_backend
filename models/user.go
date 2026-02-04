@@ -114,6 +114,9 @@ type User struct {
 	// Role History (roles held at Ace Mall)
 	RoleHistory []map[string]interface{} `json:"role_history,omitempty"`
 
+	// Exam Scores
+	ExamScores []map[string]interface{} `json:"exam_scores,omitempty"`
+
 	// Status
 	IsActive          bool       `json:"is_active"`
 	IsTerminated      bool       `json:"is_terminated"`

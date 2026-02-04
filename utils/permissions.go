@@ -338,6 +338,36 @@ func GetUserProfile(db *sql.DB, userID string, permissionLevel PermissionLevel) 
 		}
 	}
 
+	// Fetch Exam Scores - available for all permission levels
+	examScoresRows, err := db.Query(`
+		SELECT exam_type, score, year_taken
+		FROM exam_scores
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+	`, userID)
+	if err == nil {
+		defer examScoresRows.Close()
+		examScores := []map[string]interface{}{}
+		for examScoresRows.Next() {
+			var examType, score string
+			var yearTaken sql.NullInt64
+
+			if err := examScoresRows.Scan(&examType, &score, &yearTaken); err == nil {
+				exam := map[string]interface{}{
+					"exam_type": examType,
+					"score":     score,
+				}
+				if yearTaken.Valid {
+					exam["year_taken"] = yearTaken.Int64
+				}
+				examScores = append(examScores, exam)
+			}
+		}
+		if len(examScores) > 0 {
+			user.ExamScores = examScores
+		}
+	}
+
 	// Fetch Next of Kin and Guarantors for view_full and view_team permissions
 	// This allows HR/CEO/COO and managers (Branch Managers, Floor Managers) to see this info
 	if permissionLevel != PermissionViewFull && permissionLevel != PermissionViewTeam {

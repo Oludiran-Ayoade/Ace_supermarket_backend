@@ -389,6 +389,7 @@ func CreateStaffByHR(c *gin.Context) {
 		CourseOfStudy *string           `json:"course_of_study"`
 		Grade         *string           `json:"grade"`
 		Institution   *string           `json:"institution"`
+		ExamScores    *string           `json:"exam_scores"`
 		Salary        *float64          `json:"salary"`
 		NextOfKin     *NextOfKinRequest `json:"next_of_kin"`
 		Guarantor1    *GuarantorRequest `json:"guarantor_1"`
@@ -616,6 +617,21 @@ func CreateStaffByHR(c *gin.Context) {
 					fmt.Printf("✅ Saved Guarantor 2 work ID: %s\n", *req.G2WorkIDURL)
 				}
 			}
+		}
+	}
+
+	// Insert Exam Scores if provided
+	if req.ExamScores != nil && *req.ExamScores != "" {
+		// Parse exam scores (format: "WAEC: 5 credits, JAMB: 250")
+		examScoreUUID := uuid.New().String()
+		_, examErr := config.DB.Exec(`
+			INSERT INTO exam_scores (id, user_id, exam_type, score, created_at)
+			VALUES ($1, $2, $3, $4, $5)
+		`, examScoreUUID, userUUID, "General", *req.ExamScores, now)
+		if examErr != nil {
+			fmt.Printf("⚠️ Exam scores insert failed: %v\n", examErr)
+		} else {
+			fmt.Printf("✅ Saved exam scores for user\n")
 		}
 	}
 
