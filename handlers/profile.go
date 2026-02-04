@@ -439,8 +439,16 @@ func UpdateStaffProfile(c *gin.Context) {
 
 	// Handle exam scores update separately (in exam_scores table)
 	if req.ExamScores != nil && *req.ExamScores != "" {
+		fmt.Printf("🟣 Updating exam scores for user %s: %s\n", targetUserID, *req.ExamScores)
+
 		// Delete existing exam scores
-		_, _ = db.Exec("DELETE FROM exam_scores WHERE user_id = $1", targetUserID)
+		deleteResult, deleteErr := db.Exec("DELETE FROM exam_scores WHERE user_id = $1", targetUserID)
+		if deleteErr != nil {
+			fmt.Printf("⚠️ Exam scores delete failed: %v\n", deleteErr)
+		} else {
+			rowsAffected, _ := deleteResult.RowsAffected()
+			fmt.Printf("🟣 Deleted %d existing exam score records\n", rowsAffected)
+		}
 
 		// Insert new exam score
 		examScoreUUID := uuid.New().String()
@@ -449,7 +457,9 @@ func UpdateStaffProfile(c *gin.Context) {
 			VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
 		`, examScoreUUID, targetUserID, "General", *req.ExamScores)
 		if examErr != nil {
-			fmt.Printf("⚠️ Exam scores update failed: %v\n", examErr)
+			fmt.Printf("❌ Exam scores insert failed: %v\n", examErr)
+		} else {
+			fmt.Printf("✅ Exam scores saved successfully: %s\n", *req.ExamScores)
 		}
 	}
 
