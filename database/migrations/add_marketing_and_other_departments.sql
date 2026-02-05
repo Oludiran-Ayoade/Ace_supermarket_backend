@@ -1,9 +1,18 @@
--- Add Marketing Department, Other Staffs Department, and Senior Staffs category
+-- Add Marketing Department, Other Staffs Department, and Senior Staffs department
 -- Migration for new departments and roles
 
 -- ============================================
 -- ADD NEW DEPARTMENTS
 -- ============================================
+
+-- Senior Staffs Department (for top-level senior executives)
+INSERT INTO departments (id, name, description, is_active)
+VALUES (
+    uuid_generate_v4(),
+    'Senior Staffs',
+    'Top-level senior executives and management',
+    true
+) ON CONFLICT (name) DO NOTHING;
 
 -- Marketing Department
 INSERT INTO departments (id, name, description, is_active)
