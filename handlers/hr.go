@@ -386,6 +386,7 @@ func CreateStaffByHR(c *gin.Context) {
 		MaritalStatus *string           `json:"marital_status"`
 		StateOfOrigin *string           `json:"state_of_origin"`
 		DateOfBirth   *string           `json:"date_of_birth"`
+		DateJoined    *string           `json:"date_joined"`
 		HomeAddress   *string           `json:"home_address"`
 		CourseOfStudy *string           `json:"course_of_study"`
 		Grade         *string           `json:"grade"`
@@ -459,6 +460,19 @@ func CreateStaffByHR(c *gin.Context) {
 		}
 	}
 
+	// Parse date_joined from request, or use current time if not provided
+	var dateJoined interface{}
+	if req.DateJoined != nil && *req.DateJoined != "" {
+		parsedDateJoined, err := time.Parse("2006-01-02", *req.DateJoined)
+		if err == nil {
+			dateJoined = parsedDateJoined
+		} else {
+			dateJoined = now
+		}
+	} else {
+		dateJoined = now
+	}
+
 	query := `
 		INSERT INTO users (
 			id, email, password_hash, full_name, phone_number, role_id, 
@@ -481,7 +495,7 @@ func CreateStaffByHR(c *gin.Context) {
 		req.PassportURL, req.NationalIDURL, req.BirthCertificateURL, req.WaecCertificateURL,
 		req.NecoCertificateURL, req.DegreeCertificateURL, req.NyscCertificateURL,
 		req.StateOfOriginCertURL, req.ProfileImageURL,
-		true, false, now, now, now)
+		true, false, dateJoined, now, now)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create staff: " + err.Error()})
