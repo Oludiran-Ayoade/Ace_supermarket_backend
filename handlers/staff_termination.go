@@ -20,7 +20,7 @@ type TerminateStaffRequest struct {
 // TerminateStaff moves a staff member to the departed_staff table and deactivates their account
 func TerminateStaff(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
-	staffID := c.Param("id")
+	staffID := c.Param("user_id")
 
 	var req TerminateStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -157,7 +157,7 @@ func TerminateStaff(c *gin.Context) {
 // RestoreStaff reactivates a terminated staff member
 func RestoreStaff(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
-	staffID := c.Param("id")
+	staffID := c.Param("user_id")
 
 	// Start transaction
 	tx, err := db.Begin()
