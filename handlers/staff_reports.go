@@ -20,6 +20,7 @@ type StaffReportItem struct {
 	CourseOfStudy  *string `json:"course_of_study"`
 	Grade          *string `json:"grade"`
 	Institution    *string `json:"institution"`
+	ExamScores     *string `json:"exam_scores"`
 	DepartmentName *string `json:"department_name"`
 	BranchName     *string `json:"branch_name"`
 	Salary         float64 `json:"current_salary"`
@@ -46,11 +47,13 @@ func GetStaffReport(c *gin.Context) {
 			u.current_salary, u.employee_id,
 			r.name as role_name, r.category as role_category,
 			d.name as department_name,
-			b.name as branch_name
+			b.name as branch_name,
+			es.score as exam_scores
 		FROM users u
 		LEFT JOIN roles r ON u.role_id = r.id
 		LEFT JOIN departments d ON u.department_id = d.id
 		LEFT JOIN branches b ON u.branch_id = b.id
+		LEFT JOIN exam_scores es ON u.id = es.user_id
 		WHERE u.is_terminated = false
 	`
 
@@ -110,7 +113,7 @@ func GetStaffReport(c *gin.Context) {
 	for rows.Next() {
 		var item StaffReportItem
 		var dateJoined, dateOfBirth sql.NullTime
-		var courseOfStudy, grade, institution, employeeID sql.NullString
+		var courseOfStudy, grade, institution, employeeID, examScores sql.NullString
 		var departmentName, branchName sql.NullString
 
 		err := rows.Scan(
@@ -119,6 +122,7 @@ func GetStaffReport(c *gin.Context) {
 			&item.Salary, &employeeID,
 			&item.RoleName, &item.RoleCategory,
 			&departmentName, &branchName,
+			&examScores,
 		)
 
 		if err != nil {
@@ -142,6 +146,9 @@ func GetStaffReport(c *gin.Context) {
 		}
 		if institution.Valid {
 			item.Institution = &institution.String
+		}
+		if examScores.Valid {
+			item.ExamScores = &examScores.String
 		}
 		if employeeID.Valid {
 			item.EmployeeID = &employeeID.String
