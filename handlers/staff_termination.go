@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -224,19 +225,19 @@ func GetDepartedStaff(c *gin.Context) {
 	argCount := 1
 
 	if terminationType != "" {
-		query += ` AND termination_type = $` + string(rune(argCount))
+		query += fmt.Sprintf(` AND termination_type = $%d`, argCount)
 		args = append(args, terminationType)
 		argCount++
 	}
 
 	if branch != "" {
-		query += ` AND branch_name = $` + string(rune(argCount))
+		query += fmt.Sprintf(` AND branch_name = $%d`, argCount)
 		args = append(args, branch)
 		argCount++
 	}
 
 	if department != "" {
-		query += ` AND department_name = $` + string(rune(argCount))
+		query += fmt.Sprintf(` AND department_name = $%d`, argCount)
 		args = append(args, department)
 		argCount++
 	}

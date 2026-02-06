@@ -52,7 +52,7 @@ func GetAllStaff(c *gin.Context) {
 		LEFT JOIN roles r ON u.role_id = r.id
 		LEFT JOIN departments d ON u.department_id = d.id
 		LEFT JOIN branches b ON u.branch_id = b.id
-		WHERE u.is_active = true
+		WHERE u.is_active = true AND u.is_terminated = false
 	`
 
 	args := []interface{}{}
