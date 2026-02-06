@@ -197,7 +197,7 @@ func TestPushNotification(db *sql.DB, userID string) error {
 	data := map[string]string{
 		"type": "test",
 	}
-	return SendPushNotification(db, userID, "Test Notification", "This is a test push notification from Ace Supermarket", data)
+	return SendPushNotification(db, userID, "Test Notification", "This is a test push notification from Ace Mall", data)
 }
 
 // Helper to convert data to JSON string for logging

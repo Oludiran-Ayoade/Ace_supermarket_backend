@@ -13,7 +13,7 @@ import (
 func SendEmail(to, subject, htmlBody string) error {
 	sendGridAPIKey := os.Getenv("SENDGRID_API_KEY")
 	fromEmail := os.Getenv("FROM_EMAIL")
-	fromName := "Ace Supermarket"
+	fromName := "Ace Mall"
 
 	if sendGridAPIKey == "" {
 		log.Printf("⚠️ SendGrid API key not configured. Logging email instead.\n")
@@ -80,12 +80,12 @@ const accountCreatedTemplate = `
 <body>
 	<div class="container">
 		<div class="header">
-			<h1>🛒 ACE SUPERMARKET</h1>
+			<h1>🛒 ACE MALL</h1>
 			<p>Staff Management System</p>
 		</div>
 		<div class="content">
 			<p class="greeting">Hello <strong>%s</strong>,</p>
-			<p>Welcome to the Ace Supermarket family! 🎉</p>
+			<p>Welcome to the Ace Mall family! 🎉</p>
 			<p>An account has been created for you in our Staff Management Application. Below are your account details:</p>
 			
 			<div class="info-box">
@@ -119,7 +119,7 @@ const accountCreatedTemplate = `
 			
 			<p><strong>Next Steps:</strong></p>
 			<ol>
-				<li>Download the Ace Supermarket Staff App</li>
+				<li>Download the Ace Mall Staff App</li>
 				<li>Sign in using the credentials above</li>
 				<li>Change your password in Profile Settings</li>
 				<li>Complete your profile information</li>
@@ -128,9 +128,9 @@ const accountCreatedTemplate = `
 			<p>If you have any questions or need assistance, please contact your supervisor or the HR department.</p>
 		</div>
 		<div class="footer">
-			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com</p>
-			<p>© 2026 Ace Supermarket. All rights reserved.</p>
+			<p><strong>Ace Mall Management Team</strong></p>
+			<p>📧 support@acemall.com</p>
+			<p>© 2026 Ace Mall. All rights reserved.</p>
 		</div>
 	</div>
 </body>
@@ -139,7 +139,7 @@ const accountCreatedTemplate = `
 
 // SendAccountCreatedEmail sends welcome email to newly created staff
 func SendAccountCreatedEmail(to, fullName, email, password, roleName, departmentName, branchName string) error {
-	subject := "Welcome to Ace Supermarket - Your Account Has Been Created"
+	subject := "Welcome to Ace Mall - Your Account Has Been Created"
 
 	// Build branch info HTML
 	branchHTML := ""
@@ -180,7 +180,7 @@ const passwordResetOTPTemplate = `
 		</div>
 		<div class="content">
 			<p>Hello <strong>%s</strong>,</p>
-			<p>We received a request to reset your password for your Ace Supermarket staff account.</p>
+			<p>We received a request to reset your password for your Ace Mall staff account.</p>
 			
 			<div class="otp-box">
 				<p style="margin: 0; font-size: 14px; opacity: 0.9;">Your verification code is:</p>
@@ -190,7 +190,7 @@ const passwordResetOTPTemplate = `
 			
 			<p><strong>How to reset your password:</strong></p>
 			<ol>
-				<li>Open the Ace Supermarket Staff App</li>
+				<li>Open the Ace Mall Staff App</li>
 				<li>Enter this 6-digit code</li>
 				<li>Create your new password</li>
 			</ol>
@@ -200,9 +200,9 @@ const passwordResetOTPTemplate = `
 			</div>
 		</div>
 		<div class="footer">
-			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com</p>
-			<p>© 2026 Ace Supermarket. All rights reserved.</p>
+			<p><strong>Ace Mall Management Team</strong></p>
+			<p>📧 support@acemall.com</p>
+			<p>© 2026 Ace Mall. All rights reserved.</p>
 		</div>
 	</div>
 </body>
@@ -215,7 +215,7 @@ func SendPasswordResetOTP(to, fullName, otp string) error {
 	log.Printf("🔐 PASSWORD RESET OTP for %s: %s", to, otp)
 	log.Printf("📧 Full Name: %s", fullName)
 
-	subject := "Password Reset Code - Ace Supermarket"
+	subject := "Password Reset Code - Ace Mall"
 	body := fmt.Sprintf(passwordResetOTPTemplate, fullName, otp)
 	return SendEmail(to, subject, body)
 }
@@ -256,12 +256,12 @@ const adminNotificationTemplate = `
 				<p style="white-space: pre-wrap;">%s</p>
 			</div>
 			
-			<p>Please check your Ace Supermarket Staff App for more details.</p>
+			<p>Please check your Ace Mall Staff App for more details.</p>
 		</div>
 		<div class="footer">
-			<p><strong>Ace Supermarket Management Team</strong></p>
-			<p>📧 support@acesupermarket.com</p>
-			<p>© 2026 Ace Supermarket. All rights reserved.</p>
+			<p><strong>Ace Mall Management Team</strong></p>
+			<p>📧 support@acemall.com</p>
+			<p>© 2026 Ace Mall. All rights reserved.</p>
 		</div>
 	</div>
 </body>
