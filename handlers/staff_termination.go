@@ -54,12 +54,14 @@ func TerminateStaff(c *gin.Context) {
 		fullName, email                                  string
 		employeeID, roleName, departmentName, branchName sql.NullString
 		finalSalary                                      sql.NullFloat64
+		dateJoined                                       sql.NullTime
 		isTerminated                                     bool
 	)
 
 	err = db.QueryRow(`
 		SELECT 
 			u.full_name, u.email, u.employee_id, u.current_salary, u.is_terminated,
+			u.date_joined,
 			r.name as role_name,
 			d.name as department_name,
 			b.name as branch_name
@@ -70,6 +72,7 @@ func TerminateStaff(c *gin.Context) {
 		WHERE u.id = $1
 	`, staffID).Scan(
 		&fullName, &email, &employeeID, &finalSalary, &isTerminated,
+		&dateJoined,
 		&roleName, &departmentName, &branchName,
 	)
 
@@ -111,15 +114,15 @@ func TerminateStaff(c *gin.Context) {
 			id, user_id, full_name, email, employee_id, role_name, 
 			department_name, branch_name, termination_type, termination_reason,
 			terminated_by, terminated_by_name, terminated_by_role,
-			last_working_day, final_salary, clearance_notes,
+			last_working_day, final_salary, clearance_notes, date_joined,
 			termination_date, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
 	`,
 		terminatedID, staffID, fullName, email,
 		employeeID, roleName, departmentName, branchName,
 		req.TerminationType, req.Reason,
 		hrUserID, hrName, hrRole,
-		lastWorkingDay, finalSalary, req.ClearanceNotes,
+		lastWorkingDay, finalSalary, req.ClearanceNotes, dateJoined,
 		time.Now(), time.Now(), time.Now(),
 	)
 
@@ -216,7 +219,8 @@ func GetDepartedStaff(c *gin.Context) {
 			id, user_id, full_name, email, employee_id, role_name,
 			department_name, branch_name, termination_type, termination_reason,
 			terminated_by_name, terminated_by_role, termination_date,
-			last_working_day, final_salary, clearance_status, clearance_notes
+			last_working_day, final_salary, clearance_status, clearance_notes,
+			date_joined
 		FROM terminated_staff
 		WHERE 1=1
 	`
@@ -263,6 +267,7 @@ func GetDepartedStaff(c *gin.Context) {
 			finalSalary                                      sql.NullFloat64
 			clearanceStatus                                  sql.NullString
 			clearanceNotes                                   sql.NullString
+			dateJoined                                       sql.NullTime
 		)
 
 		err := rows.Scan(
@@ -270,6 +275,7 @@ func GetDepartedStaff(c *gin.Context) {
 			&departmentName, &branchName, &terminationType, &terminationReason,
 			&terminatedByName, &terminatedByRole, &terminationDate,
 			&lastWorkingDay, &finalSalary, &clearanceStatus, &clearanceNotes,
+			&dateJoined,
 		)
 
 		if err != nil {
@@ -286,6 +292,10 @@ func GetDepartedStaff(c *gin.Context) {
 			"terminated_by_name": terminatedByName,
 			"terminated_by_role": terminatedByRole,
 			"termination_date":   terminationDate,
+		}
+
+		if dateJoined.Valid {
+			staff["date_joined"] = dateJoined.Time
 		}
 
 		if employeeID.Valid {
