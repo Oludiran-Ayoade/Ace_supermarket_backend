@@ -189,19 +189,20 @@ func GetAllStaff(c *gin.Context) {
 func GetStaffStats(c *gin.Context) {
 	db := c.MustGet("db").(*sql.DB)
 
-	// Total staff count
+	// Total staff count (exclude terminated)
 	var totalStaff int
-	err := db.QueryRow(`SELECT COUNT(*) FROM users`).Scan(&totalStaff)
+	err := db.QueryRow(`SELECT COUNT(*) FROM users WHERE is_terminated = false`).Scan(&totalStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch stats"})
 		return
 	}
 
-	// Staff by category
+	// Staff by category (exclude terminated)
 	rows, err := db.Query(`
 		SELECT r.category, COUNT(*) as count
 		FROM users u
 		INNER JOIN roles r ON u.role_id = r.id
+		WHERE u.is_terminated = false
 		GROUP BY r.category
 		ORDER BY r.category
 	`)
@@ -273,26 +274,26 @@ func GetBranchStats(c *gin.Context) {
 		return
 	}
 
-	// Total staff in branch
+	// Total staff in branch (exclude terminated)
 	var totalStaff int
-	err = db.QueryRow(`SELECT COUNT(*) FROM users WHERE branch_id = $1`, branchID.String).Scan(&totalStaff)
+	err = db.QueryRow(`SELECT COUNT(*) FROM users WHERE branch_id = $1 AND is_terminated = false`, branchID.String).Scan(&totalStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch branch stats"})
 		return
 	}
 
-	// Active staff count
+	// Active staff count (exclude terminated)
 	var activeStaff int
-	err = db.QueryRow(`SELECT COUNT(*) FROM users WHERE branch_id = $1 AND is_active = true`, branchID.String).Scan(&activeStaff)
+	err = db.QueryRow(`SELECT COUNT(*) FROM users WHERE branch_id = $1 AND is_active = true AND is_terminated = false`, branchID.String).Scan(&activeStaff)
 	if err != nil {
 		activeStaff = 0
 	}
 
-	// Staff by department in this branch
+	// Staff by department in this branch (exclude terminated)
 	rows, err := db.Query(`
 		SELECT d.name, COUNT(u.id) as count
 		FROM departments d
-		LEFT JOIN users u ON d.id = u.department_id AND u.branch_id = $1
+		LEFT JOIN users u ON d.id = u.department_id AND u.branch_id = $1 AND u.is_terminated = false
 		GROUP BY d.name
 		ORDER BY count DESC
 	`, branchID.String)
